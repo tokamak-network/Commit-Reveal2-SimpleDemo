@@ -23,7 +23,7 @@ export default function RankOfEachParticipants({ round: currentRound }) {
     const [round, setRound] = useState(undefined)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
     const dispatch = useNotification()
-    const [RankOfEachParticipants, setRankOfEachParticipants] = useState([])
+    const [RankOfEachParticipants, setRankOfEachParticipants] = useState(undefined)
     const {
         runContractFunction: getRankPointOfEachParticipants,
         isLoading,
@@ -93,8 +93,14 @@ export default function RankOfEachParticipants({ round: currentRound }) {
                         <div>Get RankPoint Of Each Participants</div>
                     )}
                 </button>
-                <div>{RankOfEachParticipants.addresses.toString()}</div>
-                <div>{RankOfEachParticipants.rankPoints.toString()}</div>
+                {RankOfEachParticipants ? (
+                    <div>
+                        <div>{RankOfEachParticipants.addresses.toString()}</div>
+                        <div>{RankOfEachParticipants.rankPoints.toString()}</div>
+                    </div>
+                ) : (
+                    <div></div>
+                )}
             </div>
         </div>
     )
