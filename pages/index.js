@@ -215,7 +215,10 @@ export default function Home() {
                 </div> */}
                         <Commit commitIndex="0" />
                         <div>
-                            <RankOfEachParticipants round={round} />
+                            <RankOfEachParticipants
+                                round={round}
+                                participatedRounds={participatedRounds}
+                            />
                         </div>
                     </div>
                 ) : (

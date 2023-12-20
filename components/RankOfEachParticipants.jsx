@@ -16,7 +16,7 @@ import { abi, contractAddresses } from "./../constants"
 import { useMoralis } from "react-moralis"
 import { useNotification, Input, Table, Avatar, Tag } from "web3uikit"
 import { useState } from "react"
-export default function RankOfEachParticipants({ round: currentRound }) {
+export default function RankOfEachParticipants({ round: currentRound, participatedRounds }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const [roundState, setRoundState] = useState("initial")
@@ -104,6 +104,13 @@ export default function RankOfEachParticipants({ round: currentRound }) {
                         errorMessage="Round is required"
                     />
                 </div>
+                {participatedRounds?.length > 0 ? (
+                    <div className="mt-1">
+                        Rounds you've participated in : {participatedRounds.toString()}
+                    </div>
+                ) : (
+                    <div></div>
+                )}
 
                 <button
                     id="enterRaffleByCommit"
