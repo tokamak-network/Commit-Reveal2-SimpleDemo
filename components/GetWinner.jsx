@@ -18,7 +18,8 @@ import { useState } from "react"
 import { createTestCases2 } from "./../utils/testFunctions"
 import { Input, useNotification } from "web3uikit"
 import Withdraw from "./Withdraw"
-export default function GetWinner({ round: currentRound }) {
+import RankOfEachParticipants from "./RankOfEachParticipants"
+export default function GetWinner({ round: currentRound, participatedRounds }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const raffleAddress = chainId in contractAddresses ? contractAddresses[chainId][0] : null
@@ -68,7 +69,7 @@ export default function GetWinner({ round: currentRound }) {
                 <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr">
                     Get Result
                 </h3>
-                <div className="my-2">
+                <div className="mt-5">
                     <Input
                         label="Round"
                         type="number"
@@ -79,7 +80,11 @@ export default function GetWinner({ round: currentRound }) {
                         state={roundState}
                         errorMessage="Round is required"
                     />
+                    <div className="mt-1">
+                        Rounds you've participated in : {participatedRounds.toString()}
+                    </div>
                 </div>
+
                 <button
                     id="enterRaffleByCommit"
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded ml-auto mt-7"
