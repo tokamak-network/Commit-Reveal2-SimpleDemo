@@ -94,7 +94,7 @@ export default function Commit() {
     return (
         <div className="border-dashed border-amber-950 border-2 rounded-lg p-10 m-5">
             <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr font-bold">
-                Enter Christmas Event by Commit
+                Join Christmas Event by Commit
             </h3>
             <div className="mb-2 mt-5">
                 <Input
