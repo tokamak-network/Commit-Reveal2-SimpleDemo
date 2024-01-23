@@ -23,7 +23,9 @@ export default function GetWinner({ round: currentRound, participatedRounds }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const randomAirdropAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
     const setUpParams = createTestCases2()[0]
     const dispatch = useNotification()
     const { runContractFunction: getWinnerAddress, isLoading, isFetching } = useWeb3Contract()

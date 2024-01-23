@@ -38,6 +38,9 @@ export default function Header() {
                 <Link href="/" key="1">
                     <a className="mr-4 p-6">Home</a>
                 </Link>
+                <Link href="/commit" key="5">
+                    <a className="mr-4 p-6">Commit</a>
+                </Link>
                 <Link href="/set-up" key="2">
                     <a className="mr-4 p-6">Set Up</a>
                 </Link>

@@ -19,7 +19,9 @@ export default function SetUpPage() {
     const [nowTime, setNowTime] = useState(new Date())
     const chainId = parseInt(chainIdHex)
     const randomAirdropAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
 
     let [round, setRound] = useState(0)
     const [isSetUp, setIsSetUp] = useState(false)

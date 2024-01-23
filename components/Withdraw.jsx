@@ -19,7 +19,9 @@ export default function Withdraw({ round }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const randomAirdropAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
     const dispatch = useNotification()
     const { runContractFunction: withdraw, isLoading, isFetching } = useWeb3Contract()
     async function withdrawFunction() {
