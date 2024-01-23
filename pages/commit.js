@@ -1,14 +1,18 @@
+import SetUp from "../components/SetUp"
 import Round from "../components/Round"
 import Commit from "../components/Commit"
+import GetWinner from "../components/GetWinner"
+import Withdraw from "../components/Withdraw"
 import { useMoralis } from "react-moralis"
 import { useState, useEffect } from "react"
 import { useWeb3Contract } from "react-moralis"
 import { abi, contractAddresses } from "./../constants"
+import { CountdownCircleTimer } from "react-countdown-circle-timer"
+import { ethers, toBeHex } from "ethers"
 import Moment from "react-moment"
 import { useInterval } from "use-interval"
-import { Widget, useNotification } from "web3uikit"
+import { Widget } from "web3uikit"
 import RankOfEachParticipants from "../components/RankOfEachParticipants"
-import { ethers } from "ethers"
 
 const supportedChains = ["31337", "11155111"]
 
@@ -25,80 +29,9 @@ export default function Home() {
     const [settedUpValues, setSettedUpValues] = useState({})
     const [timeRemaining, setTimeRemaining] = useState(0)
     const [started, setStarted] = useState("")
-    const [participatedRoundsLength, setParticipatedRoundsLength] = useState()
     const [participatedRounds, setParticipatedRounds] = useState([])
-    const [nextRound, setNextRound] = useState()
-    const dispatch = useNotification()
     function str_pad_left(string, pad, length) {
         return (new Array(length + 1).join(pad) + string).slice(-length)
-    }
-    const { runContractFunction: registerNextRound, isLoading } = useWeb3Contract()
-    const [isFetching, setIsFetching] = useState(false)
-    const { runContractFunction: getParticipantsLengthAtRound } = useWeb3Contract()
-    const { runContractFunction: getNextRound } = useWeb3Contract({
-        abi: abi,
-        contractAddress: randomAirdropAddress, //,
-        functionName: "getNextRound", //,
-        params: {},
-    })
-    async function getRankPointOfEachParticipantsFunction() {
-        setIsFetching(true)
-        // const provider = new ethers.BrowserProvider(window.ethereum)
-        // const randomAirdropContract = new ethers.Contract(randomAirdropAddress, abi, provider)
-        // let gasEstimate = await randomAirdropContract.registerNextRound.estimateGas()
-        // console.log(gasEstimate)
-        // const signer = await provider.getSigner()
-        // console.log(
-        //     await randomAirdropContract.connect(signer).registerNextRound.populateTransaction()
-        // )
-        // const data = await randomAirdropContract
-        //     .connect(signer)
-        //     .registerNextRound({ gasLimit: Number(gasEstimate) * 1.5 })
-        // console.log(data)
-        const registerNextRoundOptions = {
-            abi: abi,
-            contractAddress: randomAirdropAddress,
-            functionName: "registerNextRound",
-            params: {},
-        }
-        await registerNextRound({
-            params: registerNextRoundOptions,
-            onSuccess: handleSuccess,
-            onError: (error) => {
-                console.log(error)
-                setIsFetching(false)
-                dispatch({
-                    type: "error",
-                    message:
-                        error?.data && error.data.message?.includes("gas required exceeds")
-                            ? "already registered"
-                            : error?.error?.message && error.error.message != "execution reverted"
-                            ? error.error.message
-                            : error.error
-                            ? new ethers.Interface(abi).parseError(
-                                  error.error.data.originalError.data
-                              ).name
-                            : error?.data?.message,
-                    title: "Error Message",
-                    position: "topR",
-                    icon: "bell",
-                })
-            },
-        })
-    }
-    const handleSuccess = async function (tx) {
-        await tx.wait(1)
-        setIsFetching(false)
-        handleNewNotification(tx)
-    }
-    const handleNewNotification = function () {
-        dispatch({
-            type: "info",
-            message: "Transaction Completed",
-            title: "Tx Notification",
-            position: "topR",
-            icon: "bell",
-        })
     }
     useInterval(() => {
         let commitDurationInt
@@ -141,26 +74,12 @@ export default function Home() {
 
     async function updateUI() {
         let roundFromCall = await randomAirdropRound({ onError: (error) => console.log(error) })
-        let nextRoundFromCall = await getNextRound({ onError: (error) => console.log(error) })
-        setNextRound(nextRoundFromCall?.toString())
         if (roundFromCall === undefined) roundFromCall = 0
         setRound(roundFromCall.toString())
-        const participantsLengthfromCallOptions = {
-            abi: abi,
-            contractAddress: randomAirdropAddress,
-            functionName: "getParticipantsLengthAtRound",
-            params: { _round: nextRoundFromCall },
-        }
-        const participantsLengthfromCall = await getParticipantsLengthAtRound({
-            params: participantsLengthfromCallOptions,
-            onError: (error) => console.log(error),
-        })
-        setParticipatedRoundsLength(participantsLengthfromCall?.toString())
         const participatedRoundsfromCall = await getParticipatedRounds({
             onError: (error) => console.log(error),
         })
         let temp = []
-
         if (participatedRoundsfromCall) {
             for (let i = 0; i < participatedRoundsfromCall.length; i++) {
                 temp.push(participatedRoundsfromCall[i].toString())
@@ -203,6 +122,24 @@ export default function Home() {
             setUpTime: result["setUpTime"].toString(),
         })
     }
+    function fancyTimeFormat(duration) {
+        // Hours, minutes and seconds
+        const hrs = ~~(duration / 3600)
+        const mins = ~~((duration % 3600) / 60)
+        const secs = ~~duration % 60
+
+        // Output like "1:01" or "4:03:59" or "123:03:59"
+        let ret = ""
+
+        if (hrs > 0) {
+            ret += "" + hrs + ":" + (mins < 10 ? "0" : "")
+        }
+
+        ret += "" + mins + ":" + (secs < 10 ? "0" : "")
+        ret += "" + secs
+
+        return ret
+    }
     return (
         <div className="bg-slate-50	opacity-80 min-h-screen bg-repeat-y bg-cover bg-center py-10">
             <div
@@ -212,31 +149,71 @@ export default function Home() {
                 <Round round={round} />
                 {randomAirdropAddress ? (
                     <div>
-                        <div className="p-5">
-                            <div className="border-dashed border-amber-950 border-2 rounded-lg p-10">
-                                <div className="mb-2 font-bold">
-                                    Register For Round{" "}
-                                    <span className="font-black">{nextRound}</span>
-                                </div>
-                                <button
-                                    id="enterEventByCommit"
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded ml-auto mt-7"
-                                    disabled={isLoading || isFetching}
-                                    type="button"
-                                    onClick={getRankPointOfEachParticipantsFunction}
+                        <div className="border-dashed border-amber-950 border-2 rounded-lg m-5 truncate hover:text-clip ">
+                            <div className="mt-10 ml-10 font-bold">Current Round Info</div>
+                            {settedUpValues ? (
+                                <div
+                                    style={{ display: "grid", gap: "20px", padding: "40px 20px" }}
                                 >
-                                    {isLoading || isFetching ? (
-                                        <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-                                    ) : (
-                                        <div>Register</div>
-                                    )}
-                                </button>
-                                <div className="pt-2">
-                                    Number of participants registered :
-                                    <span className="font-bold"> {participatedRoundsLength}</span>
+                                    <section style={{ display: "flex", gap: "20px" }}>
+                                        <Widget info={timeRemaining} title="TIME REMAINING" />
+
+                                        <Widget
+                                            info={
+                                                str_pad_left(
+                                                    Math.floor(
+                                                        parseInt(settedUpValues.commitDuration) /
+                                                            60
+                                                    ),
+                                                    "0",
+                                                    2
+                                                ) +
+                                                " min, " +
+                                                str_pad_left(
+                                                    parseInt(settedUpValues.commitDuration) -
+                                                        Math.floor(
+                                                            parseInt(
+                                                                settedUpValues.commitDuration
+                                                            ) / 60
+                                                        ) *
+                                                            60,
+                                                    "0",
+                                                    2
+                                                ) +
+                                                " sec"
+                                            }
+                                            title="COMMIT DURATION"
+                                        ></Widget>
+                                        <Widget
+                                            info={new Date(settedUpValues.setUpTime * 1000)
+                                                .toLocaleString()
+                                                .slice(5)}
+                                            title="STARTED AT"
+                                        />
+                                    </section>
                                 </div>
-                            </div>
+                            ) : (
+                                <div></div>
+                            )}
                         </div>
+                        {/* <div className="m-5">
+                    <CountdownCircleTimer
+                        isPlaying={isSetUp}
+                        duration={isSetUp ? settedUpValues.commitDuration : 0}
+                        initialRemainingTime={
+                            isSetUp
+                                ? settedUpValues.commitDuration -
+                                  (Math.round(Date.now() / 1000) - settedUpValues.setUpTime)
+                                : 0
+                        }
+                        colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+                        colorsTime={[7, 5, 2, 0]}
+                    >
+                        {({ remainingTime }) => remainingTime}
+                    </CountdownCircleTimer>
+                    <div>Commit Remaining Time</div>
+                </div> */}
+                        <Commit commitIndex="0" round={round} />
                         <div>
                             <RankOfEachParticipants
                                 round={round}
