@@ -16,13 +16,16 @@ import { abi, contractAddresses } from "./../constants"
 import { useMoralis } from "react-moralis"
 import { useNotification, Input, Table, Avatar, Tag } from "web3uikit"
 import { useState } from "react"
+import { ethers } from "ethers"
 export default function RankOfEachParticipants({ round: currentRound, participatedRounds }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const [roundState, setRoundState] = useState("initial")
     const [round, setRound] = useState(undefined)
     const randomAirdropAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
     const dispatch = useNotification()
     const [RankOfEachParticipants, setRankOfEachParticipants] = useState(undefined)
     const [tableContents, setTableContents] = useState([])
@@ -54,9 +57,14 @@ export default function RankOfEachParticipants({ round: currentRound, participat
                 onError: (error) => {
                     dispatch({
                         type: "error",
-                        message: error?.error?.message
-                            ? error.error.message
-                            : error?.data?.message,
+                        message:
+                            error?.error?.message && error.error.message != "execution reverted"
+                                ? error.error.message
+                                : error.error
+                                ? new ethers.Interface(abi).parseError(
+                                      error.error.data.originalError.data
+                                  ).name
+                                : error?.data?.message,
                         title: "Error Message",
                         position: "topR",
                         icon: "bell",
@@ -106,8 +114,9 @@ export default function RankOfEachParticipants({ round: currentRound, participat
                     />
                 </div>
                 {participatedRounds?.length > 0 ? (
-                    <div className="mt-1">
-                        Rounds you've participated in : {participatedRounds.toString()}
+                    <div className="mt-4">
+                        Rounds you've participated in :{" "}
+                        <span className="font-bold">{participatedRounds.toString()}</span>
                     </div>
                 ) : (
                     <div></div>
