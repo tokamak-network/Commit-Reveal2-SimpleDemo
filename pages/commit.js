@@ -196,30 +196,7 @@ export default function Home() {
                                 <div></div>
                             )}
                         </div>
-                        {/* <div className="m-5">
-                    <CountdownCircleTimer
-                        isPlaying={isSetUp}
-                        duration={isSetUp ? settedUpValues.commitDuration : 0}
-                        initialRemainingTime={
-                            isSetUp
-                                ? settedUpValues.commitDuration -
-                                  (Math.round(Date.now() / 1000) - settedUpValues.setUpTime)
-                                : 0
-                        }
-                        colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-                        colorsTime={[7, 5, 2, 0]}
-                    >
-                        {({ remainingTime }) => remainingTime}
-                    </CountdownCircleTimer>
-                    <div>Commit Remaining Time</div>
-                </div> */}
                         <Commit commitIndex="0" round={round} />
-                        <div>
-                            <RankOfEachParticipants
-                                round={round}
-                                participatedRounds={participatedRounds}
-                            />
-                        </div>
                     </div>
                 ) : (
                     <div></div>
