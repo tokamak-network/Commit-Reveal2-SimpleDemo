@@ -28,11 +28,13 @@ const ReactJson = dynamic(() => import("react-json-view-with-toggle"), {
 function classNames(...classes) {
     return classes.filter(Boolean).join(" ")
 }
-export default function Commit() {
+export default function Commit({ round }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex)
     const randomAirdropAddress =
-        chainId in contractAddresses ? contractAddresses[chainId][0] : null
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
     const [commitCalldata, setCommitCalldata] = useState()
     const [commitData, setCommitData] = useState()
     const [commitDataState, setCommitDataState] = useState("initial")
@@ -61,8 +63,9 @@ export default function Commit() {
             const enterEventByCommitOptions = {
                 abi: abi,
                 contractAddress: randomAirdropAddress,
-                functionName: "enterEventByCommit",
+                functionName: "commit",
                 params: {
+                    _round: round,
                     _c: commitCalldata,
                 },
             }
