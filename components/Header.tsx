@@ -14,7 +14,7 @@
 import { ConnectButton } from "web3uikit"
 import Link from "next/link"
 import Image from "next/image"
-const imageLoader = ({ src, width, quality }) => {
+const imageLoader = ({ src, width, quality }:any) => {
     return `../tokamaklogo.png`
 }
 
@@ -38,7 +38,7 @@ export default function Header() {
                 <Link href="/" key="1">
                     <a className="mr-4 p-6">Home</a>
                 </Link>
-                <Link href="/commit" key="5">
+                <Link href="/commit" key="4">
                     <a className="mr-4 p-6">Commit</a>
                 </Link>
                 <Link href="/set-up" key="2">

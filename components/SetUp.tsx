@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useWeb3Contract } from "react-moralis"
-import { abi, contractAddresses } from "../constants"
+import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 import { useMoralis } from "react-moralis"
-import { useEffect, useState } from "react"
+import { useState, Dispatch, SetStateAction } from "react"
 import { createTestCases2 } from "../utils/testFunctions"
-import { Input, useNotification, Form, Button } from "web3uikit"
+import { Input, useNotification, Button, Bell } from "web3uikit"
 import SetModal from "./SetModal"
-import { ethers } from "ethers"
-//import { useRouter } from "next/router"
-import document from "global/document"
 
-export default function SetUp({ updateUI, isSetUp }) {
+export default function SetUp({ updateUI }:{updateUI:()=>Promise<void>}) {
     const [, updateState] = useState()
-    //const router = useRouter()
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
+    const chainId = parseInt(chainIdHex!)
+    const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
@@ -34,28 +31,21 @@ export default function SetUp({ updateUI, isSetUp }) {
     const setUpParams = createTestCases2()[0]
     const dispatch = useNotification()
 
-    const [formData, setFormData] = useState(undefined)
-
-    const [editItem, setEditItem] = useState(false)
+    const [editItem, setEditItem] = useState<string>("")
     const [modalInputValue, setModalInputValue] = useState("")
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [nValue, setNValue] = useState(JSON.stringify(setUpParams.n))
     const [setUpProofs, setSetUpProofs] = useState(JSON.stringify(setUpParams.setupProofs))
-    const [commitDuration, setCommitDuration] = useState()
-    const [commitDurationState, setCommitDurationState] = useState("initial")
-    // const [revealDuration, setRevealDuration] = useState()
-    // const [revealDurationState, setRevealDurationState] = useState("initial")
+    const [commitDuration, setCommitDuration] = useState<string>("")
+    const [commitDurationState, setCommitDurationState] = useState<"initial" | "error" | "disabled" | "confirmed">("initial")
 
+    // @ts-ignore
     const { runContractFunction: setUp, isLoading, isFetching } = useWeb3Contract()
     function validation() {
-        if (commitDuration == undefined || commitDuration == "" || commitDuration == 0) {
+        if (commitDuration == undefined || commitDuration == "" || commitDuration == "0") {
             setCommitDurationState("error")
             return false
         }
-        // } else if (revealDuration == undefined || revealDuration == "" || revealDuration == 0) {
-        //     setRevealDurationState("error")
-        //     return false
-        // }
         return true
     }
 
@@ -63,7 +53,7 @@ export default function SetUp({ updateUI, isSetUp }) {
         if (validation()) {
             const setUpOptions = {
                 abi: abi,
-                contractAddress: randomAirdropAddress,
+                contractAddress: randomAirdropAddress!,
                 functionName: "setUp",
                 params: {
                     _commitDuration: parseInt(commitDuration),
@@ -76,13 +66,13 @@ export default function SetUp({ updateUI, isSetUp }) {
             await setUp({
                 params: setUpOptions,
                 onSuccess: handleSuccess,
-                onError: (error) => {
+                onError: (error:any) => {
                     dispatch({
                         type: "error",
                         message: error?.data?.message,
                         title: "Error Message",
                         position: "topR",
-                        icon: "bell",
+                        icon: <Bell/>//"bell",
                     })
                     console.log(error)
                 },
@@ -90,25 +80,21 @@ export default function SetUp({ updateUI, isSetUp }) {
             await updateUI()
         }
     }
-    const handleSuccess = async function (tx) {
+    const handleSuccess = async function (tx:any) {
         await tx.wait(1)
-        handleNewNotification(tx)
-        //updateUI()
+        handleNewNotification()
     }
-    // function updateUI() {
-    //     setFormData(undefined)
-    // }
     const handleNewNotification = function () {
         dispatch({
             type: "info",
             message: "Transaction Completed",
             title: "Tx Notification",
             position: "topR",
-            icon: "bell",
+            icon: <Bell/>
         })
     }
 
-    const setValue = function (jsonString) {
+    const setValue = function (jsonString:string) {
         if (isModalOpen) {
             if (jsonString) {
                 if (editItem === "n value") {
@@ -133,15 +119,10 @@ export default function SetUp({ updateUI, isSetUp }) {
         setIsModalOpen(false)
     }
 
-    // useEffect(() => {
-    //     if (isWeb3Enabled) {
-    //     }
-    // }, [isWeb3Enabled])
-
     return (
-        <div className="p-5">
-            <div className="border-dashed border-amber-950 border-2 rounded-lg p-10">
-                <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr">
+        <div className="p-5" key="1">
+            <div className="border-dashed border-amber-950 border-2 rounded-lg p-10" key="bordercontainer">
+                <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr" key="h3">
                     Set Up
                 </h3>
                 <div className="mt-10">
@@ -156,18 +137,6 @@ export default function SetUp({ updateUI, isSetUp }) {
                         state={commitDurationState}
                     />
                 </div>
-                {/* <div className="mt-10">
-                    <Input
-                        label="Reveal Duration in Seconds"
-                        placeholder="120 (2 mins*)"
-                        type="number"
-                        id="RevealDuration"
-                        validation={{ required: true, numberMin: 0 }}
-                        value={revealDuration}
-                        onChange={(e) => setRevealDuration(e.target.value)}
-                        state={revealDurationState}
-                    />
-                </div> */}
                 <div className="mt-9">
                     <Input
                         label="n value"
@@ -216,6 +185,7 @@ export default function SetUp({ updateUI, isSetUp }) {
                     setValue={setValue}
                     setModalInputValue={setModalInputValue}
                     modalInputValue={modalInputValue}
+                    key = {editItem}
                 />
             </div>
         </div>

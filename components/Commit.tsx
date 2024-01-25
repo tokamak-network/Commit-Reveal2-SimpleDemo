@@ -14,30 +14,32 @@
 import { useWeb3Contract } from "react-moralis"
 import { Switch } from "@headlessui/react"
 import dynamic from "next/dynamic"
-import { abi, contractAddresses } from "./../constants"
+import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 import { useMoralis } from "react-moralis"
 import { useEffect, useState } from "react"
-import { createTestCases2 } from "./../utils/testFunctions"
-import { Input, useNotification, Button, Toggle } from "web3uikit"
+import { Input, useNotification, Button, Bell } from "web3uikit"
 import { getBitLenth2, getLength } from "../utils/testFunctions"
-import { toBeHex, dataLength, ethers } from "ethers"
+import  ethers  from "ethers"
+import { BigNumberStruct } from "../typechain-types/RandomAirdrop"
 import React from "react"
 const ReactJson = dynamic(() => import("react-json-view-with-toggle"), {
     ssr: false,
 })
-function classNames(...classes) {
+function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ")
 }
-export default function Commit({ round }) {
+export default function Commit({ round }:{round:string}) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
+    const contractAddresses: {[key:string]:string[]} = contractAddressesJSON
+    const chainId = parseInt(chainIdHex!)
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
             : null
-    const [commitCalldata, setCommitCalldata] = useState()
-    const [commitData, setCommitData] = useState()
-    const [commitDataState, setCommitDataState] = useState("initial")
+    const [commitCalldata, setCommitCalldata] = useState<BigNumberStruct>()
+    const [commitData, setCommitData] = useState<string>()
+    const [commitDataState, setCommitDataState] = useState<"error" | "initial" | "disabled" | "confirmed" | undefined>("initial")
+    // @ts-ignore
     const { runContractFunction: enterEventByCommit, isLoading, isFetching } = useWeb3Contract()
     const [enabled, setEnabled] = useState(false)
     const dispatch = useNotification()
@@ -46,13 +48,13 @@ export default function Commit({ round }) {
         if (commitData == undefined || commitData == "") {
             setCommitDataState("error")
             return false
-        } else if (commitData == "0x" || commitData == "0" || commitData == 0) {
+        } else if (commitData == "0x" || commitData == "0") {
             dispatch({
                 type: "error",
                 message: "Commit Value cannot be 0",
                 title: "Error Message",
                 position: "topR",
-                icon: "bell",
+                icon: <Bell/>,
             })
             return false
         }
@@ -62,7 +64,7 @@ export default function Commit({ round }) {
         if (validation()) {
             const enterEventByCommitOptions = {
                 abi: abi,
-                contractAddress: randomAirdropAddress,
+                contractAddress: randomAirdropAddress!,
                 functionName: "commit",
                 params: {
                     _round: round,
@@ -72,28 +74,29 @@ export default function Commit({ round }) {
             await enterEventByCommit({
                 params: enterEventByCommitOptions,
                 onSuccess: handleSuccess,
-                onError: (error) => {
+                onError: (error:any) => {
+                    console.log(error)
                     dispatch({
                         type: "error",
                         message:
                             error?.error?.message && error.error.message != "execution reverted"
                                 ? error.error.message
                                 : error.error
-                                ? new ethers.Interface(abi).parseError(
+                                ? new ethers.utils.Interface(abi).parseError(
                                       error.error.data.originalError.data
                                   ).name
                                 : error?.data?.message,
                         title: "Error Message",
                         position: "topR",
-                        icon: "bell",
+                        icon: <Bell/>,
                     })
                 },
             })
         }
     }
-    const handleSuccess = async function (tx) {
+    const handleSuccess = async function (tx:any) {
         await tx.wait(1)
-        handleNewNotification(tx)
+        handleNewNotification()
         //updateUI()
     }
     //async function updateUI() {}
@@ -103,7 +106,7 @@ export default function Commit({ round }) {
             message: "Transaction Completed",
             title: "Tx Notification",
             position: "topR",
-            icon: "bell",
+            icon: <Bell/>,
         })
     }
     useEffect(() => {
@@ -158,9 +161,10 @@ export default function Commit({ round }) {
                         if (enabled) {
                             let stringVal = e.target.value
                             if (e.target.value.length == 0) stringVal = "0"
+                            const hexValue: string = ethers.utils.hexlify(stringVal)
                             setCommitCalldata({
-                                val: toBeHex(stringVal, getLength(dataLength(toBeHex(stringVal)))),
-                                bitlen: getBitLenth2(BigInt(stringVal)),
+                                val: ethers.utils.hexZeroPad(hexValue, getLength(ethers.utils.hexDataLength(hexValue))),
+                                bitlen: getBitLenth2(stringVal),
                             })
                         } else {
                             if (e.target.value.length != 0)
@@ -180,21 +184,19 @@ export default function Commit({ round }) {
                             ""
                         )
                         if (enabled) setCommitData(BigInt("0x" + bytesHex).toString(10))
-                        else
+                        else {
                             setCommitData(
                                 JSON.stringify({
-                                    val: toBeHex(
-                                        "0x" + bytesHex,
-                                        getLength(dataLength("0x" + bytesHex))
-                                    ),
-                                    bitlen: getBitLenth2(BigInt("0x" + bytesHex)),
+                                    val: ethers.utils.hexZeroPad("0x" + bytesHex, getLength(ethers.utils.hexDataLength("0x" + bytesHex))),
+                                    bitlen: getBitLenth2("0x" + bytesHex),
                                 })
                             )
+                        }
                         let stringVal = BigInt("0x" + bytesHex).toString(10)
                         if (stringVal.length == 0) stringVal = "0"
                         setCommitCalldata({
-                            val: toBeHex(stringVal, getLength(dataLength(toBeHex(stringVal)))),
-                            bitlen: getBitLenth2(BigInt(stringVal)),
+                            val: ethers.utils.hexZeroPad(ethers.utils.hexlify(stringVal), getLength(ethers.utils.hexDataLength(ethers.utils.hexlify(stringVal)))),
+                            bitlen: getBitLenth2(stringVal),
                         })
                     }}
                     text="Auto Generate"
@@ -219,7 +221,7 @@ export default function Commit({ round }) {
                 style={{ textOverflow: "ellipsis", overflow: "hidden" }}
             >
                 {/* calldata: {JSON.stringify(commitCalldata)} */}
-                <ReactJson src={commitCalldata} />
+                <ReactJson src={commitCalldata as object} />
             </div>
             <div className="mt-2">
                 <div>

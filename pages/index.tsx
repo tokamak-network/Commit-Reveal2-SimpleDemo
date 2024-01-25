@@ -1,70 +1,67 @@
 import Round from "../components/Round"
-import Commit from "../components/Commit"
 import { useMoralis } from "react-moralis"
 import { useState, useEffect } from "react"
 import { useWeb3Contract } from "react-moralis"
-import { abi, contractAddresses } from "./../constants"
-import Moment from "react-moment"
+import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 import { useInterval } from "use-interval"
-import { Widget, useNotification } from "web3uikit"
+import { useNotification, Bell } from "web3uikit"
 import RankOfEachParticipants from "../components/RankOfEachParticipants"
-import { ethers } from "ethers"
-
-const supportedChains = ["31337", "11155111"]
+import { BigNumber, BigNumberish, ethers } from "ethers"
+import {SettedUpValues} from "../typechain-types/RandomAirdrop"
+import {ICommitRevealRecoverRNG} from "../typechain-types/RandomAirdrop"
 
 export default function Home() {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
+    const chainId = parseInt(chainIdHex!)
+    const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
             : null
-    let [round, setRound] = useState(0)
-    const [isSetUp, setIsSetUp] = useState(false)
-    const [isCommit, setIsCommit] = useState(false)
-    const [settedUpValues, setSettedUpValues] = useState({})
-    const [timeRemaining, setTimeRemaining] = useState(0)
-    const [started, setStarted] = useState("")
-    const [participatedRoundsLength, setParticipatedRoundsLength] = useState()
-    const [participatedRounds, setParticipatedRounds] = useState([])
-    const [nextRound, setNextRound] = useState()
+    let [round, setRound] = useState<string>("")
+    const [settedUpValues, setSettedUpValues] = useState<SettedUpValues>({
+        T: "",
+        n: "",
+        nl: "",
+        g: "",
+        gl: "",
+        h: "",
+        hl: "",
+        commitDuration: "",
+        commitRevealDuration: "",
+        setUpTime: "",
+    })
+    const [timeRemaining, setTimeRemaining] = useState<string>("")
+    const [participatedRoundsLength, setParticipatedRoundsLength] = useState<string>("")
+    const [participatedRounds, setParticipatedRounds] = useState<string[]>([])
+    const [nextRound, setNextRound] = useState<string>('')
     const dispatch = useNotification()
-    function str_pad_left(string, pad, length) {
+    function str_pad_left(string:number, pad:string, length:number) {
         return (new Array(length + 1).join(pad) + string).slice(-length)
     }
+    // @ts-ignore
     const { runContractFunction: registerNextRound, isLoading } = useWeb3Contract()
     const [isFetching, setIsFetching] = useState(false)
+    // @ts-ignore
     const { runContractFunction: getParticipantsLengthAtRound } = useWeb3Contract()
     const { runContractFunction: getNextRound } = useWeb3Contract({
         abi: abi,
-        contractAddress: randomAirdropAddress, //,
+        contractAddress: randomAirdropAddress!, //,
         functionName: "getNextRound", //,
         params: {},
     })
     async function getRankPointOfEachParticipantsFunction() {
         setIsFetching(true)
-        // const provider = new ethers.BrowserProvider(window.ethereum)
-        // const randomAirdropContract = new ethers.Contract(randomAirdropAddress, abi, provider)
-        // let gasEstimate = await randomAirdropContract.registerNextRound.estimateGas()
-        // console.log(gasEstimate)
-        // const signer = await provider.getSigner()
-        // console.log(
-        //     await randomAirdropContract.connect(signer).registerNextRound.populateTransaction()
-        // )
-        // const data = await randomAirdropContract
-        //     .connect(signer)
-        //     .registerNextRound({ gasLimit: Number(gasEstimate) * 1.5 })
-        // console.log(data)
         const registerNextRoundOptions = {
             abi: abi,
-            contractAddress: randomAirdropAddress,
+            contractAddress: randomAirdropAddress!,
             functionName: "registerNextRound",
             params: {},
         }
         await registerNextRound({
             params: registerNextRoundOptions,
             onSuccess: handleSuccess,
-            onError: (error) => {
+            onError: (error:any) => {
                 console.log(error)
                 setIsFetching(false)
                 dispatch({
@@ -75,21 +72,21 @@ export default function Home() {
                             : error?.error?.message && error.error.message != "execution reverted"
                             ? error.error.message
                             : error.error
-                            ? new ethers.Interface(abi).parseError(
+                            ? new ethers.utils.Interface(abi).parseError(
                                   error.error.data.originalError.data
                               ).name
                             : error?.data?.message,
                     title: "Error Message",
                     position: "topR",
-                    icon: "bell",
+                    icon: <Bell/>//"bell",
                 })
             },
         })
     }
-    const handleSuccess = async function (tx) {
+    const handleSuccess = async function (tx:any) {
         await tx.wait(1)
         setIsFetching(false)
-        handleNewNotification(tx)
+        handleNewNotification()
     }
     const handleNewNotification = function () {
         dispatch({
@@ -97,17 +94,17 @@ export default function Home() {
             message: "Transaction Completed",
             title: "Tx Notification",
             position: "topR",
-            icon: "bell",
+            icon: <Bell/>//"bell",
         })
     }
     useInterval(() => {
         let commitDurationInt
         if (settedUpValues.commitDuration) {
-            commitDurationInt = parseInt(settedUpValues.commitDuration)
+            commitDurationInt = parseInt(settedUpValues.commitDuration.toString())
             if (commitDurationInt > 0) {
                 let _timeRemaing =
                     commitDurationInt -
-                    (Math.floor(Date.now() / 1000) - parseInt(settedUpValues.setUpTime))
+                    (Math.floor(Date.now() / 1000) - parseInt(settedUpValues.setUpTime.toString()))
                 const minutes = Math.floor(_timeRemaing / 60)
                 const seconds = _timeRemaing - minutes * 60
                 if (_timeRemaing > -1)
@@ -125,40 +122,41 @@ export default function Home() {
     useInterval(() => {
         updateUI()
     }, 12000)
+    // @ts-ignore
     const { runContractFunction: getSetUpValuesAtRound } = useWeb3Contract()
     const { runContractFunction: randomAirdropRound } = useWeb3Contract({
         abi: abi,
-        contractAddress: randomAirdropAddress, //,
+        contractAddress: randomAirdropAddress!, //,
         functionName: "randomAirdropRound", //,
         params: {},
     })
     const { runContractFunction: getParticipatedRounds } = useWeb3Contract({
         abi: abi,
-        contractAddress: randomAirdropAddress, //,
+        contractAddress: randomAirdropAddress!, //,
         functionName: "getParticipatedRounds", //,
         params: {},
     })
 
     async function updateUI() {
-        let roundFromCall = await randomAirdropRound({ onError: (error) => console.log(error) })
-        let nextRoundFromCall = await getNextRound({ onError: (error) => console.log(error) })
-        setNextRound(nextRoundFromCall?.toString())
+        let roundFromCall = await randomAirdropRound({ onError: (error) => console.log(error) }) as BigNumberish
+        let nextRoundFromCall = await getNextRound({ onError: (error) => console.log(error) }) as BigNumberish
+        setNextRound(nextRoundFromCall.toString())
         if (roundFromCall === undefined) roundFromCall = 0
         setRound(roundFromCall.toString())
         const participantsLengthfromCallOptions = {
             abi: abi,
-            contractAddress: randomAirdropAddress,
+            contractAddress: randomAirdropAddress!,
             functionName: "getParticipantsLengthAtRound",
             params: { _round: nextRoundFromCall },
         }
         const participantsLengthfromCall = await getParticipantsLengthAtRound({
             params: participantsLengthfromCallOptions,
             onError: (error) => console.log(error),
-        })
+        }) as BigNumberish
         setParticipatedRoundsLength(participantsLengthfromCall?.toString())
         const participatedRoundsfromCall = await getParticipatedRounds({
             onError: (error) => console.log(error),
-        })
+        }) as BigNumber[]
         let temp = []
 
         if (participatedRoundsfromCall) {
@@ -168,27 +166,18 @@ export default function Home() {
             setParticipatedRounds(temp)
         }
         await getGetSetUpValuesAtRound(roundFromCall)
-        if (settedUpValues.setUpTime !== undefined && settedUpValues.setUpTime != "0") {
-            setIsSetUp(true)
-            setIsCommit(true)
-            setStarted("Started!")
-        } else {
-            setIsSetUp(false)
-            setIsCommit(true)
-            setStarted("Not Started")
-        }
     }
-    async function getGetSetUpValuesAtRound(roundFromCall) {
+    async function getGetSetUpValuesAtRound(roundFromCall:BigNumberish) {
         const setUpValuesAtRoundOptions = {
             abi: abi,
-            contractAddress: randomAirdropAddress,
+            contractAddress: randomAirdropAddress!,
             functionName: "getSetUpValuesAtRound",
             params: { _round: roundFromCall },
         }
-        const result = await getSetUpValuesAtRound({
+        const result: ICommitRevealRecoverRNG.SetUpValueAtRoundStructOutput = await getSetUpValuesAtRound({
             params: setUpValuesAtRoundOptions,
             onError: (error) => console.log(error),
-        })
+        }) as ICommitRevealRecoverRNG.SetUpValueAtRoundStructOutput
         if (result === undefined) return
         setSettedUpValues({
             T: result["T"].toString(),

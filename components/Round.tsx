@@ -11,11 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { contractAddresses } from "./../constants"
+import { contractAddresses as contractAddressesJSON } from "../constants"
 import { useMoralis } from "react-moralis"
-export default function Round({ round, started }) {
+export default function Round({ round }:{round:string}) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
+    const chainId = parseInt(chainIdHex!)
+    const contractAddresses: {[key:string]:string[]} = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
@@ -25,7 +26,7 @@ export default function Round({ round, started }) {
         <div className="p-5">
             {randomAirdropAddress ? (
                 <h2 className="pt-4 px-4 text-2xl subpixel-antialiased font-semibold">
-                    Current Round: <span className="font-extrabold">{round}</span> {started}
+                    Current Round: <span className="font-extrabold">{round}</span>
                 </h2>
             ) : (
                 <h2 className="py-4 px-4 font-bold text-2xl text-red-600">

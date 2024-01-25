@@ -11,9 +11,5 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-const contractAddresses = require("./contractAddress.json")
-const abi = require("./abi.json")
-module.exports = {
-    abi,
-    contractAddresses,
-}
+export { default as contractAddresses } from "./contractAddress.json"
+export { default as abi } from "./abi.json"

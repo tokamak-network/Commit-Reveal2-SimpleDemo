@@ -12,26 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useWeb3Contract } from "react-moralis"
-import { abi, contractAddresses } from "./../constants"
+import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 import { useMoralis } from "react-moralis"
-import { useEffect, useState } from "react"
-import { createTestCases2 } from "./../utils/testFunctions"
-import { Input, useNotification, Form, Button } from "web3uikit"
+import { useState } from "react"
+import { createTestCases2 } from "../utils/testFunctions"
+import { Input, useNotification, Button, Bell } from "web3uikit"
 import SetModal from "./SetModal"
+//import {ethers} from "ethers"
 
-export default function Recover({ round: currentRound }) {
+export default function Recover({ round: currentRound }:{round:string}) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const [roundState, setRoundState] = useState("initial")
-    const [round, setRound] = useState(undefined)
-    const chainId = parseInt(chainIdHex)
+    const [roundState, setRoundState] = useState<"error" | "initial" | "confirmed" | "disabled">("initial")
+    const [round, setRound] = useState<string>("")
+    const chainId = parseInt(chainIdHex!)
+    const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
             : null
     const recoverParams = createTestCases2()[0]
     const dispatch = useNotification()
+    // @ts-ignore
     const { runContractFunction: recover, isLoading, isFetching } = useWeb3Contract()
-    const [editItem, setEditItem] = useState(false)
+    const [editItem, setEditItem] = useState<string>("")
     const [modalInputValue, setModalInputValue] = useState("")
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [recoveryProofs, setRecoveryProofs] = useState(
@@ -44,11 +47,20 @@ export default function Recover({ round: currentRound }) {
         }
         return true
     }
-    async function recoverFunction(data) {
+    async function recoverFunction() {
+        
+        // const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any");
+        // await provider.send("eth_requestAccounts", []);
+        // const signer = provider.getSigner();
+        // const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider);
+        //const estimateGas = await randomAirdropContract.connect(signer).estimateGas.recover(parseInt(round), JSON.parse(recoveryProofs))
+        // const tx = await randomAirdropContract.connect(signer).recover(parseInt(round), JSON.parse(recoveryProofs), {gasLimit:3000000})
+        // console.log(await tx.wait())
+    
         if (validation()) {
             const recoveryOptions = {
                 abi: abi,
-                contractAddress: randomAirdropAddress,
+                contractAddress: randomAirdropAddress!,
                 functionName: "recover",
                 params: {
                     _round: parseInt(round),
@@ -59,22 +71,22 @@ export default function Recover({ round: currentRound }) {
             await recover({
                 params: recoveryOptions,
                 onSuccess: handleSuccess,
-                onError: (error) => {
+                onError: (error:any) => {
                     console.log(error)
                     dispatch({
                         type: "error",
                         message: error?.data?.message,
                         title: "Error Message",
                         position: "topR",
-                        icon: "bell",
+                        icon: <Bell/>
                     })
                 },
             })
         }
     }
-    const handleSuccess = async function (tx) {
+    const handleSuccess = async function (tx:any) {
         await tx.wait(1)
-        handleNewNotification(tx)
+        handleNewNotification()
 
         //updateUI()
     }
@@ -85,14 +97,9 @@ export default function Recover({ round: currentRound }) {
             message: "Transaction Completed",
             title: "Tx Notification",
             position: "topR",
-            icon: "bell",
+            icon: <Bell/>//"bell",
         })
     }
-    useEffect(() => {
-        if (isWeb3Enabled) {
-            //updateUI()
-        }
-    }, [isWeb3Enabled])
 
     const handleProofsEdit = function () {
         setEditItem("recoveryProofs")
@@ -101,7 +108,7 @@ export default function Recover({ round: currentRound }) {
     const onClose = function () {
         setIsModalOpen(false)
     }
-    const setValue = function (jsonString) {
+    const setValue = function (jsonString:string) {
         if (isModalOpen) {
             if (jsonString) {
                 if (editItem === "recoveryProofs") {
@@ -122,6 +129,7 @@ export default function Recover({ round: currentRound }) {
                     setValue={setValue}
                     setModalInputValue={setModalInputValue}
                     modalInputValue={modalInputValue}
+                    key = {editItem}
                 />
                 <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr">
                     Recover
@@ -132,7 +140,7 @@ export default function Recover({ round: currentRound }) {
                         type="number"
                         placeholder={currentRound}
                         id="round"
-                        validation={{ required: true, numberMax: currentRound }}
+                        validation={{ required: true, numberMax: Number(currentRound) }}
                         onChange={(e) => setRound(e.target.value)}
                         state={roundState}
                         errorMessage="Round is required"

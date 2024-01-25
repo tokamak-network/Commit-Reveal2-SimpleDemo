@@ -12,27 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useWeb3Contract } from "react-moralis"
-import { abi, contractAddresses } from "./../constants"
+import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 import { useMoralis } from "react-moralis"
-import { useNotification, Input, Table, Avatar, Tag } from "web3uikit"
+import { useNotification, Input, Table, Bell } from "web3uikit"
 import { useState } from "react"
 import { ethers } from "ethers"
-export default function RankOfEachParticipants({ round: currentRound, participatedRounds }) {
+// define type [Array(1), Array(1), addresses: Array(1), rankPoints: Array(1)]
+interface Result {
+    addresses: string[]
+    rankPoints: string[]
+}
+export default function RankOfEachParticipants({ round: currentRound = "0", participatedRounds }:{round:string, participatedRounds:string[]}) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const chainId = parseInt(chainIdHex)
-    const [roundState, setRoundState] = useState("initial")
-    const [round, setRound] = useState(undefined)
+    const chainId = parseInt(chainIdHex!)
+    const [roundState, setRoundState] = useState<"initial" | "error" | "disabled" | "confirmed">("initial")
+    const [round, setRound] = useState<string>("")
+    const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
             : null
     const dispatch = useNotification()
-    const [RankOfEachParticipants, setRankOfEachParticipants] = useState(undefined)
-    const [tableContents, setTableContents] = useState([])
+    const [tableContents, setTableContents] = useState<string[][]>([])
+    
     const {
         runContractFunction: getRankPointOfEachParticipants,
         isLoading,
-        isFetching,
+        isFetching,// @ts-ignore
     } = useWeb3Contract()
     function validation() {
         if (round == undefined || round == "") {
@@ -45,37 +51,36 @@ export default function RankOfEachParticipants({ round: currentRound, participat
         if (validation()) {
             const Options = {
                 abi: abi,
-                contractAddress: randomAirdropAddress,
+                contractAddress: randomAirdropAddress!,
                 functionName: "getRankPointOfEachParticipants",
                 params: {
                     _round: round,
                 },
             }
 
-            let result = await getRankPointOfEachParticipants({
+            let result:Result = await getRankPointOfEachParticipants({
                 params: Options,
-                onError: (error) => {
+                onError: (error :any) => {
                     dispatch({
                         type: "error",
                         message:
                             error?.error?.message && error.error.message != "execution reverted"
                                 ? error.error.message
                                 : error.error
-                                ? new ethers.Interface(abi).parseError(
+                                ? new ethers.utils.Interface(abi).parseError(
                                       error.error.data.originalError.data
                                   ).name
                                 : error?.data?.message,
                         title: "Error Message",
                         position: "topR",
-                        icon: "bell",
+                        icon: <Bell/>//"bell",
                     })
                 },
-            })
-            setRankOfEachParticipants(result)
+            }) as Result
             getTableContents(result)
         }
     }
-    const getTableContents = (result) => {
+    const getTableContents = (result:Result) => {
         let _results = []
         if (result) {
             for (let i = 0; i < result.addresses.length; i++) {
@@ -107,7 +112,7 @@ export default function RankOfEachParticipants({ round: currentRound, participat
                         type="number"
                         placeholder={currentRound}
                         id="round"
-                        validation={{ required: true, numberMax: currentRound }}
+                        validation={{ required: true, numberMax: Number(currentRound) }}
                         onChange={(e) => setRound(e.target.value)}
                         state={roundState}
                         errorMessage="Round is required"
