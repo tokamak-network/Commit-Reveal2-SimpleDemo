@@ -14,7 +14,7 @@ import StartRegistration from "../components/StartRegistration"
 
 export default function SetUpPage() {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    const [nowTime, setNowTime] = useState(new Date())
+    const [nowTime, setNowTime] = useState<Date>()
     const chainId = parseInt(chainIdHex!)
     const contractAddresses: { [key: string]: string[] } = randomAirdropAddressJSON
     const randomAirdropAddress =
@@ -119,8 +119,8 @@ export default function SetUpPage() {
                                 </div>
                                 <div key="current date">
                                     current date
-                                    {nowTime.toLocaleDateString()}
-                                    {nowTime.toLocaleTimeString()}
+                                    {nowTime ? nowTime.toLocaleDateString() : ""}
+                                    {nowTime ? nowTime.toLocaleTimeString() : ""}
                                 </div>
                                 <div key="commitEndTime">
                                     commit end time
