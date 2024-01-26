@@ -19,7 +19,7 @@ import { useMoralis } from "react-moralis"
 import { useEffect, useState } from "react"
 import { Input, useNotification, Button, Bell } from "web3uikit"
 import { getBitLenth2, getLength } from "../utils/testFunctions"
-import ethers from "ethers"
+import { ethers } from "ethers"
 import { BigNumberStruct } from "../typechain-types/RandomAirdrop"
 import React from "react"
 const ReactJson = dynamic(() => import("react-json-view-with-toggle"), {
