@@ -135,7 +135,7 @@ export default function SetUp({ updateUI }: { updateUI: () => Promise<void> }) {
     return (
         <div className="p-5" key="1">
             <div
-                className="border-dashed border-amber-950 border-2 rounded-lg p-10"
+                className="border-dashed border-slate-300 border-2 rounded-lg p-10"
                 key="bordercontainer"
             >
                 <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr" key="h3">

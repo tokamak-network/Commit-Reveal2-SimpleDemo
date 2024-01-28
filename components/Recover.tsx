@@ -133,7 +133,7 @@ export default function Recover({ round: currentRound }: { round: string }) {
 
     return (
         <div className="p-5 mb-5">
-            <div className="border-dashed border-amber-950 border-2 rounded-lg p-10">
+            <div className="border-dashed border-slate-300 border-2 rounded-lg p-10">
                 <SetModal
                     editItem={editItem}
                     isModalOpen={isModalOpen}

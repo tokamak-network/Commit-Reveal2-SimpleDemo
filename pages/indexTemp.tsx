@@ -204,13 +204,13 @@ export default function Home() {
             <div className="bg-slate-50	opacity-80 min-h-screen bg-repeat-y bg-cover bg-center py-10">
                 <div
                     style={{ minWidth: "852px" }}
-                    className="bg-white	container mx-auto w-6/12 rounded-3xl border-dashed border-amber-950 border-2"
+                    className="bg-white	container mx-auto w-6/12 rounded-3xl border-dashed border-slate-300 border-2"
                 >
                     <Round round={round} />
                     {randomAirdropAddress ? (
                         <div>
                             <div className="p-5">
-                                <div className="border-dashed border-amber-950 border-2 rounded-lg p-10">
+                                <div className="border-dashed border-slate-300 border-2 rounded-lg p-10">
                                     <div className="mb-2 font-bold">
                                         Register For Round{" "}
                                         <span className="font-black">{nextRound}</span>

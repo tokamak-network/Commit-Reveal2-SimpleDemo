@@ -25,6 +25,8 @@ import React from "react"
 const ReactJson = dynamic(() => import("react-json-view-with-toggle"), {
     ssr: false,
 })
+//import ReactJson from "react-json-view-with-toggle"
+
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ")
 }
@@ -121,7 +123,7 @@ export default function Commit({ round }: { round: string }) {
         }
     }, [isWeb3Enabled])
     return (
-        <div className="border-dashed border-amber-950 border-2 rounded-lg p-10 m-5">
+        <div className="border-dashed border-slate-300 border-2 rounded-lg p-10 m-5">
             <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr font-bold">
                 Join Airdrop Event by Commit
             </h3>
