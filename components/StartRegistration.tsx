@@ -17,9 +17,11 @@ import { useMoralis } from "react-moralis"
 import { useState } from "react"
 import { Input, useNotification, Bell } from "web3uikit"
 import { ethers } from "ethers"
+//import titanSDK from "@tokamak-network/titan-sdk"
 
 export default function StartRegistration({ updateUI }: { updateUI: () => Promise<void> }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
+    //const titanSDK = require("@tokamak-network/titan-sdk")
     const chainId = parseInt(chainIdHex!)
     const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
@@ -64,16 +66,36 @@ export default function StartRegistration({ updateUI }: { updateUI: () => Promis
             // const signer = provider.getSigner()
             // const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider)
             // try {
-            //     // await randomAirdropContract
+            //     // const tx = await randomAirdropContract
             //     //     .connect(signer)
             //     //     .startRegistration(parseInt(registrationDuration), { gasLimit: 300000 })
-            //     const estimageGas = await randomAirdropContract.estimateGas.startRegistration(
-            //         parseInt(registrationDuration)
-            //     )
-            //     console.log(parseInt(estimageGas.toString()))
+            //     // console.log(tx)
+            //     // const receipt = await tx.wait()
+            //     // console.log(receipt)
+            //     // const tx = await randomAirdropContract.populateTransaction.startRegistration(
+            //     //     parseInt(registrationDuration)
+            //     // )
+            //     // tx.from = await signer.getAddress()
+            //     // console.log(tx)
+            //     // console.log(titanSDK)
+            //     // const l2ProSDK = titanSDK?.asL2Provider(provider)
+            //     // const sDKsigner = l2ProSDK?.getSigner(await signer.getAddress())
+            //     // const estimateProvider = sDKsigner?.provider
+            //     // console.log("zzz")
+            //     // console.log(await estimateProvider?.estimateTotalGasCost(tx))
+            //     // const callStaticResult = await randomAirdropContract.callStatic.startRegistration(
+            //     //     parseInt(registrationDuration)
+            //     // )
+            //     // console.log(callStaticResult)
+            //     // const estimageGas = await randomAirdropContract.estimateGas.startRegistration(
+            //     //     parseInt(registrationDuration),
+            //     //     { gasLimit: 10000000000 }
+            //     // )
+            //     //console.log(parseInt(estimageGas.toString()))
             // } catch (error) {
             //     console.log(error)
             // }
+            // return
 
             await startRegistration({
                 params: startRegistrationOptions,
@@ -123,7 +145,7 @@ export default function StartRegistration({ updateUI }: { updateUI: () => Promis
     return (
         <div className="p-5">
             <div
-                className="border-dashed border-amber-950 border-2 rounded-lg p-10"
+                className="border-dashed border-slate-300 border-2 rounded-lg p-10"
                 key="bordercontainer"
             >
                 <h3 data-testid="test-form-title" className="sc-eXBvqI eGDBJr" key="h3">
