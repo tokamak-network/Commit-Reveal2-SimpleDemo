@@ -17,11 +17,11 @@ import { useMoralis } from "react-moralis"
 import { useState } from "react"
 import { Input, useNotification, Bell } from "web3uikit"
 import { ethers } from "ethers"
+import { decodeError } from "ethers-decode-error"
 //import titanSDK from "@tokamak-network/titan-sdk"
 
 export default function StartRegistration({ updateUI }: { updateUI: () => Promise<void> }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
-    //const titanSDK = require("@tokamak-network/titan-sdk")
     const chainId = parseInt(chainIdHex!)
     const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
@@ -36,7 +36,7 @@ export default function StartRegistration({ updateUI }: { updateUI: () => Promis
     >("initial")
     const [isFetching, setIsFetching] = useState<boolean>(false)
     // @ts-ignore
-    const { runContractFunction: startRegistration, isLoading } = useWeb3Contract()
+    const { runContractFunction: startRegistration } = useWeb3Contract()
 
     function validation() {
         if (
@@ -51,79 +51,31 @@ export default function StartRegistration({ updateUI }: { updateUI: () => Promis
     }
     async function startRegistrationFunction() {
         if (validation()) {
-            const startRegistrationOptions = {
-                abi: abi,
-                contractAddress: randomAirdropAddress!,
-                functionName: "startRegistration",
-                params: {
-                    _registrationDuration: parseInt(registrationDuration),
-                },
+            setIsFetching(true)
+
+            const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any")
+            // Prompt user for account connections
+            await provider.send("eth_requestAccounts", [])
+            const signer = provider.getSigner()
+            const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider)
+            try {
+                const tx = await randomAirdropContract
+                    .connect(signer)
+                    .startRegistration(parseInt(registrationDuration), { gasLimit: 150000 })
+                await handleSuccess(tx)
+            } catch (error: any) {
+                console.log(error.message)
+                const decodedError = decodeError(decodeError(error))
+                dispatch({
+                    type: "error",
+                    message: decodedError.error,
+                    title: "Error Message",
+                    position: "topR",
+                    icon: <Bell />,
+                })
+                setRegistrationDurationState("initial")
+                setIsFetching(false)
             }
-
-            // const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any")
-            // // Prompt user for account connections
-            // await provider.send("eth_requestAccounts", [])
-            // const signer = provider.getSigner()
-            // const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider)
-            // try {
-            //     // const tx = await randomAirdropContract
-            //     //     .connect(signer)
-            //     //     .startRegistration(parseInt(registrationDuration), { gasLimit: 300000 })
-            //     // console.log(tx)
-            //     // const receipt = await tx.wait()
-            //     // console.log(receipt)
-            //     // const tx = await randomAirdropContract.populateTransaction.startRegistration(
-            //     //     parseInt(registrationDuration)
-            //     // )
-            //     // tx.from = await signer.getAddress()
-            //     // console.log(tx)
-            //     // console.log(titanSDK)
-            //     // const l2ProSDK = titanSDK?.asL2Provider(provider)
-            //     // const sDKsigner = l2ProSDK?.getSigner(await signer.getAddress())
-            //     // const estimateProvider = sDKsigner?.provider
-            //     // console.log("zzz")
-            //     // console.log(await estimateProvider?.estimateTotalGasCost(tx))
-            //     // const callStaticResult = await randomAirdropContract.callStatic.startRegistration(
-            //     //     parseInt(registrationDuration)
-            //     // )
-            //     // console.log(callStaticResult)
-            //     // const estimageGas = await randomAirdropContract.estimateGas.startRegistration(
-            //     //     parseInt(registrationDuration),
-            //     //     { gasLimit: 10000000000 }
-            //     // )
-            //     //console.log(parseInt(estimageGas.toString()))
-            // } catch (error) {
-            //     console.log(error)
-            // }
-            // return
-
-            await startRegistration({
-                params: startRegistrationOptions,
-                onError: (error: any) => {
-                    console.log(error)
-                    const iface = new ethers.utils.Interface(abi)
-                    let errorMessage = ""
-                    if (error?.data?.data?.data) {
-                        errorMessage = iface.parseError(error?.data?.data?.data).name
-                    }
-                    dispatch({
-                        type: "error",
-                        message: error?.data?.data?.data
-                            ? errorMessage
-                            : error?.error?.message && error.error.message != "execution reverted"
-                            ? error.error.message
-                            : error?.data
-                            ? error?.data?.message
-                            : error?.message,
-                        title: "Error Message",
-                        position: "topR",
-                        icon: <Bell />,
-                    })
-                    setRegistrationDurationState("initial")
-                    setIsFetching(false)
-                },
-                onSuccess: handleSuccess,
-            })
             await updateUI()
         }
     }
@@ -165,11 +117,11 @@ export default function StartRegistration({ updateUI }: { updateUI: () => Promis
                 </div>
                 <button
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded ml-auto mt-7"
-                    disabled={isLoading || isFetching}
+                    disabled={isFetching}
                     type="button"
                     onClick={startRegistrationFunction}
                 >
-                    {isLoading || isFetching ? (
+                    {isFetching ? (
                         <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
                     ) : (
                         <div>Start Registration</div>

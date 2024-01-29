@@ -11,13 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useMoralis, useWeb3Contract } from "react-moralis"
+import { useMoralis } from "react-moralis"
 import { BackgroundImage } from "./BackgroundImage"
 import { Button } from "./Button"
 import { Container } from "./Container"
 import { abi, contractAddresses as contractAddressesJSON } from "../../constants"
 import { useNotification, Bell } from "web3uikit"
 import { ethers } from "ethers"
+import { useState } from "react"
+import { decodeError } from "ethers-decode-error"
 
 export function Register({
     participatedRoundsLength,
@@ -38,47 +40,36 @@ export function Register({
 }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex!)
+    const [isFetching, setIsFetching] = useState<boolean>(false)
     const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
             : null
     const dispatch = useNotification()
-    const {
-        runContractFunction: registerForNextRound,
-        isLoading,
-        isFetching,
-    } = useWeb3Contract({
-        abi: abi,
-        contractAddress: randomAirdropAddress!,
-        functionName: "registerForNextRound",
-        params: {},
-    })
     async function registerFunction() {
-        await registerForNextRound({
-            onSuccess: handleSuccess,
-            onError: (error: any) => {
-                console.log(error)
-                const iface = new ethers.utils.Interface(abi)
-                let errorMessage = ""
-                if (error?.data?.data?.data) {
-                    errorMessage = iface.parseError(error?.data?.data?.data).name
-                }
-                dispatch({
-                    type: "error",
-                    message: error?.data?.data?.data
-                        ? errorMessage
-                        : error?.error?.message && error.error.message != "execution reverted"
-                        ? error.error.message
-                        : error?.data
-                        ? error?.data?.message
-                        : error?.message,
-                    title: "Error Message",
-                    position: "topR",
-                    icon: <Bell />,
-                })
-            },
-        })
+        setIsFetching(true)
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any")
+        // Prompt user for account connections
+        await provider.send("eth_requestAccounts", [])
+        const signer = provider.getSigner()
+        const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider)
+        try {
+            const tx = await randomAirdropContract
+                .connect(signer)
+                .registerForNextRound({ gasLimit: 150000 })
+            await handleSuccess(tx)
+        } catch (error: any) {
+            console.log(error.message)
+            const decodedError = decodeError(decodeError(error))
+            dispatch({
+                type: "error",
+                message: decodedError.error,
+                title: "Error Message",
+                position: "topR",
+                icon: <Bell />,
+            })
+        }
         await updateUI()
     }
     const handleSuccess = async function (tx: any) {

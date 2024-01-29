@@ -11,7 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useWeb3Contract } from "react-moralis"
+//import { useWeb3Contract } from "react-moralis"
+import { decodeError } from "ethers-decode-error"
 import { Switch } from "@headlessui/react"
 import dynamic from "next/dynamic"
 import { abi, contractAddresses as contractAddressesJSON } from "../constants"
@@ -44,7 +45,8 @@ export default function Commit({ round }: { round: string }) {
         "error" | "initial" | "disabled" | "confirmed" | undefined
     >("initial")
     // @ts-ignore
-    const { runContractFunction: enterEventByCommit, isLoading, isFetching } = useWeb3Contract()
+    //const { runContractFunction: enterEventByCommit } = useWeb3Contract()
+    const [isFetching, setIsFetching] = useState<boolean>(false)
     const [enabled, setEnabled] = useState(false)
     const dispatch = useNotification()
 
@@ -66,45 +68,35 @@ export default function Commit({ round }: { round: string }) {
     }
     async function enterEventByCommitFunction() {
         if (validation()) {
-            const enterEventByCommitOptions = {
-                abi: abi,
-                contractAddress: randomAirdropAddress!,
-                functionName: "commit",
-                params: {
-                    _round: round,
-                    _c: commitCalldata,
-                },
+            setIsFetching(true)
+            const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any")
+            // Prompt user for account connections
+            await provider.send("eth_requestAccounts", [])
+            const signer = provider.getSigner()
+            const randomAirdropContract = new ethers.Contract(randomAirdropAddress!, abi, provider)
+            try {
+                const tx = await randomAirdropContract
+                    .connect(signer)
+                    .commit(parseInt(round), commitCalldata, { gasLimit: 810000 })
+                await handleSuccess(tx)
+            } catch (error: any) {
+                console.log(error.message)
+                const decodedError = decodeError(decodeError(error))
+                dispatch({
+                    type: "error",
+                    message: decodedError.error,
+                    title: "Error Message",
+                    position: "topR",
+                    icon: <Bell />,
+                })
+                setIsFetching(false)
             }
-            await enterEventByCommit({
-                params: enterEventByCommitOptions,
-                onSuccess: handleSuccess,
-                onError: (error: any) => {
-                    console.log(error)
-                    const iface = new ethers.utils.Interface(abi)
-                    let errorMessage = ""
-                    if (error?.data?.data?.data) {
-                        errorMessage = iface.parseError(error?.data?.data?.data).name
-                    }
-                    dispatch({
-                        type: "error",
-                        message: error?.data?.data?.data
-                            ? errorMessage
-                            : error?.error?.message && error.error.message != "execution reverted"
-                            ? error.error.message
-                            : error?.data
-                            ? error?.data?.message
-                            : error?.message,
-                        title: "Error Message",
-                        position: "topR",
-                        icon: <Bell />,
-                    })
-                },
-            })
         }
     }
     const handleSuccess = async function (tx: any) {
         await tx.wait(1)
         handleNewNotification()
+        setIsFetching(false)
         //updateUI()
     }
     //async function updateUI() {}
@@ -225,11 +217,11 @@ export default function Commit({ round }: { round: string }) {
             <button
                 id="enterEventByCommit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded ml-auto mt-3"
-                disabled={isLoading || isFetching}
+                disabled={isFetching}
                 type="button"
                 onClick={enterEventByCommitFunction}
             >
-                {isLoading || isFetching ? (
+                {isFetching ? (
                     <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
                 ) : (
                     <div>Commit</div>
