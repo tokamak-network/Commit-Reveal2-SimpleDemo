@@ -42,6 +42,7 @@ export function Register({
     const chainId = parseInt(chainIdHex!)
     const [isFetching, setIsFetching] = useState<boolean>(false)
     const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
+
     const randomAirdropAddress =
         chainId in contractAddresses
             ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
@@ -59,6 +60,7 @@ export function Register({
                 .connect(signer)
                 .registerForNextRound({ gasLimit: 150000 })
             await handleSuccess(tx)
+            await updateUI()
         } catch (error: any) {
             console.log(error.message)
             const decodedError = decodeError(decodeError(error))
@@ -69,12 +71,13 @@ export function Register({
                 position: "topR",
                 icon: <Bell />,
             })
+            setIsFetching(false)
         }
-        await updateUI()
     }
     const handleSuccess = async function (tx: any) {
         await tx.wait(1)
         handleNewNotification()
+        setIsFetching(false)
     }
     const handleNewNotification = function () {
         dispatch({
@@ -89,7 +92,7 @@ export function Register({
         <div className="relative py-20 sm:pb-24 sm:pt-36">
             <BackgroundImage className="-bottom-14 -top-36 " />
             <Container className="relative pb-3.5">
-                <div className="mx-auto max-w-2xl lg:max-w-4xl lg:px-12 ">
+                <div className="mx-auto max-w-2xl lg:max-w-4xl lg:px-12">
                     {randomAirdropAddress ? (
                         <>
                             {" "}
@@ -115,7 +118,11 @@ export function Register({
                                 disabled={isRegistrationOpen ? false : true}
                                 onClick={registerFunction}
                             >
-                                Register
+                                {isFetching ? (
+                                    <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                                ) : (
+                                    <div>Register</div>
+                                )}
                             </Button>
                             <dl className="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 sm:mt-16 sm:gap-x-16 sm:gap-y-10 sm:text-center lg:auto-cols-auto lg:grid-flow-col lg:grid-cols-none lg:justify-start lg:text-left">
                                 {[
@@ -135,7 +142,7 @@ export function Register({
                         </>
                     ) : (
                         <h2 className="py-4 px-4 font-bold text-2xl text-red-600 h-60">
-                            Connect to Sepolia, Titan or Set Hardhat Local Node
+                            Connect to Sepolia, Titan, Titan-Goerli or Set Hardhat Local Node
                         </h2>
                     )}
                 </div>
