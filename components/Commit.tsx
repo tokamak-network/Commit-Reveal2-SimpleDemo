@@ -161,6 +161,7 @@ export default function Commit({ round }: { round: string }) {
                         if (enabled) {
                             let stringVal = e.target.value
                             if (e.target.value.length == 0) stringVal = "0"
+
                             const hexValue: string = ethers.utils.hexlify(stringVal)
                             setCommitCalldata({
                                 val: ethers.utils.hexZeroPad(
@@ -186,6 +187,7 @@ export default function Commit({ round }: { round: string }) {
                             (o, v) => o + ("00" + v.toString(16)).slice(-2),
                             ""
                         )
+
                         if (enabled) setCommitData(BigInt("0x" + bytesHex).toString(10))
                         else {
                             setCommitData(
@@ -202,9 +204,11 @@ export default function Commit({ round }: { round: string }) {
                         if (stringVal.length == 0) stringVal = "0"
                         setCommitCalldata({
                             val: ethers.utils.hexZeroPad(
-                                ethers.utils.hexlify(stringVal),
+                                ethers.utils.hexlify("0x" + bytesHex),
                                 getLength(
-                                    ethers.utils.hexDataLength(ethers.utils.hexlify(stringVal))
+                                    ethers.utils.hexDataLength(
+                                        ethers.utils.hexlify("0x" + bytesHex)
+                                    )
                                 )
                             ),
                             bitlen: getBitLenth2(stringVal),
