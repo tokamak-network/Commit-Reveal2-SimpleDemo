@@ -8,8 +8,8 @@ import { Container } from "./MainComponents/Container"
 export function Footer() {
     return (
         <Container>
-            <div className="flex flex-col items-center border-t border-slate-400/10 py-10 sm:flex-row-reverse sm:justify-between">
-                <div className="flex">
+            <div className="flex flex-col items-center border-t border-slate-400/10 py-9 sm:flex-row-reverse sm:justify-between">
+                <div className="flex py-1">
                     <Link href="https://github.com/tokamak-network/Commit-Reveal-Recover-RNG">
                         <a className="group" aria-label="TaxPal on GitHub" target="_blank">
                             <svg
@@ -22,7 +22,7 @@ export function Footer() {
                         </a>
                     </Link>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center py-1">
                     <Link href="https://www.tokamak.network/">
                         <a target="_blank" className="flex items-center">
                             <Image
@@ -32,7 +32,7 @@ export function Footer() {
                                 height="20"
                                 alt="Picture of the author"
                             />
-                            <p className="mt-6 ml-1 text-sm text-slate-500 sm:mt-0">
+                            <p className=" ml-1 text-sm text-slate-500 sm:mt-0 flex justify-center">
                                 Tokamak Network
                             </p>
                         </a>
