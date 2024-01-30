@@ -103,7 +103,7 @@ export default function TempMain() {
     }, [isWeb3Enabled, round])
     useInterval(() => {
         updateUI()
-    }, 11500)
+    }, 11000)
     const { runContractFunction: randomAirdropRound } = useWeb3Contract({
         abi: abi,
         contractAddress: randomAirdropAddress!, //,
@@ -186,6 +186,7 @@ export default function TempMain() {
             }
         }
     }
+
     return (
         <>
             {" "}
@@ -198,6 +199,7 @@ export default function TempMain() {
                 round={nextRound}
                 updateUI={updateUI}
                 isRegistrationOpen={isRegistrationOpen}
+                isRegistered={participatedRounds.includes(nextRound)}
             />
             <div>
                 <RankOfEachParticipantsMain
