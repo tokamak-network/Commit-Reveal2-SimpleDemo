@@ -18,6 +18,7 @@ import { useInterval } from "use-interval"
 import { useNotification, Bell } from "web3uikit"
 import RankOfEachParticipantsMain from "../components/MainComponents/RankOfEachParticipantsMain"
 import { useMoralis } from "react-moralis"
+import { Footer } from "../components/Footer"
 import { useState, useEffect } from "react"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { abi, contractAddresses as contractAddressesJSON } from "../constants"
@@ -204,6 +205,7 @@ export default function TempMain() {
                     participatedRounds={participatedRounds}
                 />
             </div>
+            <Footer />
         </>
     )
 }
