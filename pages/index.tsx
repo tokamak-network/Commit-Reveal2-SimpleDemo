@@ -23,7 +23,7 @@ import { useState, useEffect } from "react"
 import { BigNumber, BigNumberish, ethers } from "ethers"
 import { abi, contractAddresses as contractAddressesJSON } from "../constants"
 export default function TempMain() {
-    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
+    const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
     const chainId = parseInt(chainIdHex!)
     const contractAddresses: { [key: string]: string[] } = contractAddressesJSON
     const randomAirdropAddress =
@@ -100,7 +100,7 @@ export default function TempMain() {
         if (isWeb3Enabled) {
             updateUI()
         }
-    }, [isWeb3Enabled, round])
+    }, [isWeb3Enabled, round, account])
     useInterval(() => {
         updateUI()
     }, 11000)
