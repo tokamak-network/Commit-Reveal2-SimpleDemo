@@ -46,12 +46,15 @@ export default function TempMain() {
         useState<string>("00hrs 00min 00sec")
     const [registrationDurationForNextRound, setRegistrationDurationForNextRound] =
         useState<string>("0")
+    const [withdrawedRounds, setWithdrawedRounds] = useState<string[]>([])
     const dispatch = useNotification()
     function str_pad_left(string: number, pad: string, length: number) {
         return (new Array(length + 1).join(pad) + string).slice(-length)
     }
     // @ts-ignore
     const { runContractFunction: registerNextRound } = useWeb3Contract()
+    // @ts-ignore
+    const { runContractFunction: getWithdrawedRounds } = useWeb3Contract()
     // @ts-ignore
     const { runContractFunction: getNumOfParticipants } = useWeb3Contract()
     const { runContractFunction: getNextRandomAirdropRound } = useWeb3Contract({
@@ -156,13 +159,30 @@ export default function TempMain() {
                 params: participatedRoundsfromCallOptions,
                 onError: (error) => console.log(error),
             })) as BigNumber[]
+            const getWithdrawedRoundsOptions = {
+                abi: airdropConsumerAbi,
+                contractAddress: consumerContractAddress!,
+                functionName: "getWithdrawedRounds",
+                params: { participant: account },
+            }
+            const getWithdrawedRoundsOptionsfromCall = (await getWithdrawedRounds({
+                params: getWithdrawedRoundsOptions,
+                onError: (error) => console.log(error),
+            })) as BigNumberish[]
             let temp = []
+            let temp2 = []
 
             if (participatedRoundsfromCall) {
                 for (let i = 0; i < participatedRoundsfromCall.length; i++) {
                     temp.push(participatedRoundsfromCall[i].toString())
                 }
                 setParticipatedRounds(temp)
+            }
+            if (getWithdrawedRoundsOptionsfromCall) {
+                for (let i = 0; i < getWithdrawedRoundsOptionsfromCall.length; i++) {
+                    temp2.push(getWithdrawedRoundsOptionsfromCall[i].toString())
+                }
+                setWithdrawedRounds(temp2)
             }
         }
     }
@@ -185,6 +205,7 @@ export default function TempMain() {
                 <RankOfEachParticipantsMain
                     round={round}
                     participatedRounds={participatedRounds}
+                    withdrawedRounds={withdrawedRounds}
                 />
             </div>
             <Footer />

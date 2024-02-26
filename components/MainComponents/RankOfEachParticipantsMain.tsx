@@ -28,9 +28,11 @@ type Result = [
 export default function RankOfEachParticipantsMain({
     round: currentRound = "0",
     participatedRounds,
+    withdrawedRounds,
 }: {
     round: string
     participatedRounds: string[]
+    withdrawedRounds: string[]
 }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -269,6 +271,18 @@ export default function RankOfEachParticipantsMain({
                             ) : (
                                 <div className="mt-6 ml-1 font-display text-xl tracking-tight text-blue-900">
                                     Rounds you've participated in :
+                                </div>
+                            )}
+                            {withdrawedRounds?.length > 0 ? (
+                                <div className="mt-1 ml-1 font-display text-xl tracking-tight text-blue-900">
+                                    Rounds you've withdrawn :{" "}
+                                    <span className="font-bold">
+                                        {withdrawedRounds.toString()}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="mt-1 ml-1 font-display text-xl tracking-tight text-blue-900">
+                                    Rounds you've withdrawn :
                                 </div>
                             )}
                             <button
