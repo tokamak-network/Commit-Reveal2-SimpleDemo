@@ -33,6 +33,7 @@ export function Register({
     updateUI,
     isRegistrationOpen,
     isRegistered,
+    setIsRegistered,
 }: {
     participatedRoundsLength: string
     timeRemaining: string
@@ -42,6 +43,7 @@ export function Register({
     updateUI: () => Promise<void>
     isRegistrationOpen: boolean
     isRegistered: boolean
+    setIsRegistered: (isRegistered: boolean) => void
 }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -83,6 +85,7 @@ export function Register({
     }
     const handleSuccess = async function (tx: any) {
         await tx.wait()
+        setIsRegistered(true)
         handleNewNotification()
         setIsFetching(false)
     }
