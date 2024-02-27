@@ -38,7 +38,6 @@ export default function TempMain() {
     const [participatedRounds, setParticipatedRounds] = useState<string[]>([])
     const [nextRound, setNextRound] = useState<string>("")
     const [isRegistrationOpen, setIsRegistrationOpen] = useState<boolean>(false)
-    const [isRegistered, setIsRegistered] = useState<boolean>(false)
     const [startRegistrationTimeForNextRound, setStartRegistrationTimeForNextRound] =
         useState<string>("0")
     const [prettyStartRegistrationTimeForNextRound, setPrettyStartRegistrationTimeForNextRound] =
@@ -179,7 +178,6 @@ export default function TempMain() {
                 }
                 setParticipatedRounds(temp)
             }
-            setIsRegistered(participatedRounds.includes(currentRound.toString()))
             if (getWithdrawedRoundsOptionsfromCall) {
                 for (let i = 0; i < getWithdrawedRoundsOptionsfromCall.length; i++) {
                     temp2.push(getWithdrawedRoundsOptionsfromCall[i].toString())
@@ -201,15 +199,13 @@ export default function TempMain() {
                 round={nextRound}
                 updateUI={updateUI}
                 isRegistrationOpen={isRegistrationOpen}
-                isRegistered={isRegistered}
-                setIsRegistered={setIsRegistered}
+                isRegistered={participatedRounds.includes(nextRound)}
             />
             <div>
                 <RankOfEachParticipantsMain
                     round={round}
                     participatedRounds={participatedRounds}
                     withdrawedRounds={withdrawedRounds}
-                    setWithdrawedRounds={setWithdrawedRounds}
                 />
             </div>
             <Footer />
