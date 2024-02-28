@@ -29,10 +29,12 @@ export default function RankOfEachParticipantsMain({
     round: currentRound = "0",
     participatedRounds,
     withdrawedRounds,
+    updateUI,
 }: {
     round: string
     participatedRounds: string[]
     withdrawedRounds: string[]
+    updateUI: () => Promise<void>
 }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -109,6 +111,7 @@ export default function RankOfEachParticipantsMain({
     }
     const handleWithdrawAirdropTokenSuccess = async (tx: any) => {
         await tx.wait()
+        await updateUI()
         dispatch({
             type: "success",
             message: "Withdrawal Successful",

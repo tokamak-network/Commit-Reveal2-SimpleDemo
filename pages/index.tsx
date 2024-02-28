@@ -206,6 +206,7 @@ export default function TempMain() {
                     round={round}
                     participatedRounds={participatedRounds}
                     withdrawedRounds={withdrawedRounds}
+                    updateUI={updateUI}
                 />
             </div>
             <Footer />
