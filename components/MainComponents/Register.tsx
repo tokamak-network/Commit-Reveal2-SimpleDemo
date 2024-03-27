@@ -158,7 +158,7 @@ export function Register({
                                     <Input
                                         label={"Enter a number of dice (1~6)"}
                                         type="number"
-                                        placeholder="or roll the dice ------->"
+                                        placeholder="or roll the dice -------->"
                                         id="CommitValue"
                                         validation={{ required: true, numberMin: 1, numberMax: 6 }}
                                         value={diceNumber}
@@ -169,7 +169,7 @@ export function Register({
                                         }}
                                         state={diceDataState}
                                         errorMessage="Commit Value is required"
-                                        width="13rem"
+                                        width="13.5rem"
                                     />
                                 </div>
                                 <div className="flex-initial">
