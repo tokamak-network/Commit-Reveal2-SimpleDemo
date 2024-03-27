@@ -91,7 +91,6 @@ export function Register({
                     .connect(signer)
                     .register(diceNumber, { gasLimit: 150000 })
                 await handleSuccess(tx)
-                await updateUI()
             } catch (error: any) {
                 console.log(error.message)
                 const decodedError = decodeError(decodeError(error))
@@ -109,16 +108,21 @@ export function Register({
     const handleSuccess = async function (tx: any) {
         await tx.wait(1)
         handleNewNotification()
-        setIsFetching(false)
+        setTimeout(() => {
+            setIsFetching(false)
+        }, 4000)
+        await updateUI()
     }
     const handleNewNotification = function () {
-        dispatch({
-            type: "info",
-            message: "Transaction Completed",
-            title: "Tx Notification",
-            position: "topR",
-            icon: <Bell />,
-        })
+        setTimeout(() => {
+            dispatch({
+                type: "info",
+                message: "Transaction Completed",
+                title: "Tx Notification",
+                position: "topR",
+                icon: <Bell />,
+            })
+        }, 4000)
     }
     const diceRef = useRef<TDiceRef>(null)
     const rollDice = (diceNum: TValue) => {

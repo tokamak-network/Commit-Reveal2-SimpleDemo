@@ -122,7 +122,9 @@ export default function RankOfEachParticipantsMain({
                     })
                 },
             })
-            setIsLoading(false)
+            setTimeout(() => {
+                setIsLoading(false)
+            }, 3000)
         }
     }
     const handleWithdrawAirdropTokenSuccess = async (tx: any) => {
@@ -135,7 +137,7 @@ export default function RankOfEachParticipantsMain({
                 position: "topR",
                 icon: <Bell />,
             })
-        }, 2000)
+        }, 3000)
         await updateUI()
     }
 
