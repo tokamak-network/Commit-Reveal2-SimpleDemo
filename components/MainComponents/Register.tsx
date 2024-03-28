@@ -110,7 +110,7 @@ export function Register({
         handleNewNotification()
         setTimeout(() => {
             setIsFetching(false)
-        }, 4000)
+        }, 6000)
         await updateUI()
     }
     const handleNewNotification = function () {
@@ -122,7 +122,7 @@ export function Register({
                 position: "topR",
                 icon: <Bell />,
             })
-        }, 4000)
+        }, 6000)
     }
     const diceRef = useRef<TDiceRef>(null)
     const rollDice = (diceNum: TValue) => {
