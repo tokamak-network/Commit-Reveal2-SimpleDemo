@@ -89,7 +89,7 @@ export function Register({
                 210000,
                 gasPrice
             )
-            const directFundingCostInt = Math.floor(Number(directFundingCost.toString()) * 1.1)
+            const directFundingCostInt = Math.floor(Number(directFundingCost.toString()) * 1.2)
             const tx = await randomAirdropContract
                 .connect(signer)
                 .requestRandomWord({ gasLimit: 318111, value: directFundingCostInt })
