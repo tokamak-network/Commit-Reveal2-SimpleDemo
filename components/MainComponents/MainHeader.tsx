@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 "use client"
-import dynamic from "next/dynamic"
-import React, { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import MobileNavigation from "./MobileNavigation"
+import { useEffect, useState } from "react"
 import { ConnectButton } from "web3uikit"
 import { Container } from "./Container"
-import Image from "next/image"
-import { NavLink } from "./NavLink"
 const imageLoader = ({ src, width, quality }: any) => {
     return `../tokamaklogo.png`
 }
@@ -53,20 +50,6 @@ export function MainHeader() {
                                     </div>
                                 </a>
                             </Link>
-                        </div>
-                        <div className="hidden md:flex md:gap-x-6">
-                            <NavLink href="/">
-                                <span>Home</span>
-                            </NavLink>
-                            <NavLink href="/commit">
-                                <span>Commit</span>
-                            </NavLink>
-                            <NavLink href="/set-up">
-                                <span>SetUp</span>
-                            </NavLink>
-                            <NavLink href="/testcase" target="_blank">
-                                <span>TestCase</span>
-                            </NavLink>
                         </div>
                     </div>
                     <div className="flex items-center gap-x-3 md:gap-x-8">
