@@ -18,6 +18,7 @@ import { useInterval } from "use-interval"
 import { Footer } from "../components/Footer"
 import { MainHeader } from "../components/MainComponents/MainHeader"
 import { Register } from "../components/MainComponents/Register"
+import { RequestTables } from "../components/MainComponents/RequestTables"
 import { consumerContractAddress as consumerContractAddressJson, randomDayAbi } from "../constants"
 
 export default function TempMain() {
@@ -33,6 +34,7 @@ export default function TempMain() {
     const [avgNumber, setAvgNumber] = useState<BigNumberish>(0)
     const [requestIds, setRequestIds] = useState<BigNumberish[]>([])
     const [randomNums, setRandomNums] = useState<BigNumberish[]>([])
+    const [threeClosestToSevenHundred, setThreeClosestToSevenHundred] = useState<any>([])
     const [startRegistrationTimeForNextRound, setStartRegistrationTimeForNextRound] =
         useState<string>("0")
     const [prettyStartRegistrationTimeForNextRound, setPrettyStartRegistrationTimeForNextRound] =
@@ -59,6 +61,12 @@ export default function TempMain() {
         abi: randomDayAbi,
         contractAddress: consumerContractAddress!, //,
         functionName: "eventEndTime", //,
+        params: {},
+    })
+    const { runContractFunction: getThreeClosestToSevenHundred } = useWeb3Contract({
+        abi: randomDayAbi,
+        contractAddress: consumerContractAddress!, //,
+        functionName: "getThreeClosestToSevenHundred", //,
         params: {},
     })
 
@@ -131,6 +139,8 @@ export default function TempMain() {
             setAvgNumber(getRequestersInfosResult[0])
             setRequestIds(getRequestersInfosResult[1])
             setRandomNums(getRequestersInfosResult[2])
+            const getThreeClosestToSevenHundredResult = await getThreeClosestToSevenHundred()
+            setThreeClosestToSevenHundred(getThreeClosestToSevenHundredResult)
             // const participantsLengthfromCallOptions = {
             //     abi: cryptoDiceConsumerAbi,
             //     contractAddress: consumerContractAddress!,
@@ -155,9 +165,14 @@ export default function TempMain() {
                 updateUI={updateUI}
                 isEventOpen={isEventOpen}
                 averageNumber={avgNumber}
-                requestIds={requestIds}
-                randomNums={randomNums}
             />
+            <div>
+                <RequestTables
+                    requestIds={requestIds}
+                    randomNums={randomNums}
+                    threeClosestToSevenHundred={threeClosestToSevenHundred}
+                />
+            </div>
             {/* <div>
                 <RankOfEachParticipantsMain
                     round={round}

@@ -45,7 +45,7 @@ export function MainHeader() {
                                     </div>
                                     <div className="pl-2 font-bold text-xl mb-2 mr-5">
                                         <span className="hidden lg:inline whitespace-nowrap">
-                                            TON Random Airdrop
+                                            TON Random Day Event
                                         </span>
                                     </div>
                                 </a>

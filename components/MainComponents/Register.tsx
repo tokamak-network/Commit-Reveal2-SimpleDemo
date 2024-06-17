@@ -36,8 +36,6 @@ export function Register({
     updateUI,
     isEventOpen,
     averageNumber,
-    requestIds,
-    randomNums,
 }: {
     timeRemaining: string
     registrationDurationForNextRound: string
@@ -45,8 +43,6 @@ export function Register({
     updateUI: () => Promise<void>
     isEventOpen: boolean
     averageNumber: BigNumberish
-    requestIds: BigNumberish[]
-    randomNums: BigNumberish[]
 }) {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -77,19 +73,21 @@ export function Register({
             randomDayAbi,
             provider
         )
+
         const crrrngCoordinator = new ethers.Contract(
             getCrrngCoordinatorAddress!,
             crrngCoordinatorAbi,
             provider
         )
         try {
-            const fee = await provider.getFeeData()
-            const gasPrice = fee.gasPrice
+            const feeData = await provider.getFeeData()
+            let gasPrice = feeData.maxFeePerGas
             const directFundingCost = await crrrngCoordinator.estimateDirectFundingPrice(
                 210000,
                 gasPrice
             )
-            const directFundingCostInt = Math.floor(Number(directFundingCost.toString()) * 1.2)
+
+            const directFundingCostInt = Math.floor(Number(directFundingCost.toString()))
             const tx = await randomAirdropContract
                 .connect(signer)
                 .requestRandomWord({ gasLimit: 318111, value: directFundingCostInt })
@@ -131,7 +129,7 @@ export function Register({
         diceRef.current?.rollDice(diceNum as TValue)
     }
     return (
-        <div className="relative py-20 sm:pb-24 sm:pt-36">
+        <div className="relative py-20 sm:pb-24 sm:pt-36 mb-16">
             <BackgroundImage className="-bottom-14 -top-36 " />
             <Container className="relative pb-3.5">
                 <div className="mx-auto max-w-2xl lg:max-w-4xl lg:px-12">
@@ -139,13 +137,14 @@ export function Register({
                         <>
                             {" "}
                             <h1 className="font-display text-5xl font-bold tracking-tighter text-blue-600 sm:text-7xl ">
-                                TON Random Day Event
+                                Crypto Target 700 🎯
                             </h1>
                             {isEventOpen ? (
                                 <div className="mt-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
                                     <div>
-                                        Your current average number is{" "}
-                                        <span className="font-semibold">
+                                        Your current average number is{": "}
+                                        <span className="font-semibold text-3xl">
+                                            {" "}
                                             {averageNumber.toString()}
                                         </span>
                                     </div>
@@ -161,7 +160,7 @@ export function Register({
                                         className={
                                             "mt-10 w-full " + (!isEventOpen ? "opacity-20" : "")
                                         }
-                                        disabled={!isEventOpen ? true : false}
+                                        disabled={!isEventOpen || isFetching ? true : false}
                                         onClick={registerFunction}
                                     >
                                         {isFetching ? (
@@ -172,10 +171,10 @@ export function Register({
                                     </Button>
                                 </div>
                             </div>
-                            <div className="mt-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
+                            {/* <div className="mt-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
                                 <div>RequestIds: {requestIds.toString()}</div>
                                 <div>RandomNumbers: {randomNums.toString()}</div>
-                            </div>
+                            </div> */}
                             <dl className="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 sm:mt-16 sm:gap-x-16 sm:gap-y-10 sm:text-center lg:auto-cols-auto lg:grid-flow-col lg:grid-cols-none lg:justify-start lg:text-left">
                                 {[
                                     ["Time Remaining", timeRemaining],
