@@ -82,9 +82,10 @@ export function Register({
         try {
             const feeData = await provider.getFeeData()
             let gasPrice = feeData.maxFeePerGas
+            if (gasPrice == null) gasPrice = feeData.gasPrice
             const directFundingCost = await crrrngCoordinator.estimateDirectFundingPrice(
                 210000,
-                gasPrice
+                gasPrice?.toString()
             )
 
             const directFundingCostInt = Math.floor(Number(directFundingCost.toString()))

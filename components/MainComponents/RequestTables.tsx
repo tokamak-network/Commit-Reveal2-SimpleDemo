@@ -186,7 +186,7 @@ export function RequestTables({
                                 <span>RandomNumber</span>,
                             ]}
                             isColumnSortable={[true, false, false]}
-                            maxPages={Math.floor(requestIds.length / 5)}
+                            maxPages={Math.ceil(requestIds.length / 5)}
                             onPageNumberChanged={function noRefCheck() {}}
                             onRowClick={function noRefCheck() {}}
                             pageSize={5}
@@ -210,7 +210,7 @@ export function RequestTables({
                                 <span>Prize Amount</span>,
                             ]}
                             isColumnSortable={[false, false, false]}
-                            maxPages={Math.floor(requestIds.length / 5)}
+                            maxPages={Math.ceil(requestIds.length / 5)}
                             onPageNumberChanged={function noRefCheck() {}}
                             onRowClick={function noRefCheck() {}}
                             pageSize={5}
