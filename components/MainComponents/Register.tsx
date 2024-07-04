@@ -193,7 +193,7 @@ export function Register({
                         </>
                     ) : (
                         <h2 className="py-4 px-4 font-bold text-2xl text-red-600 h-60">
-                            Connect to Titan, Titan-Goerli or Set Hardhat Local Node
+                            Connect to Titan-Sepolia, Titan
                         </h2>
                     )}
                 </div>
