@@ -104,10 +104,12 @@ export default function TempMain() {
 
     async function updateUI() {
         if (consumerContractAddress) {
+            const eventDuration = 86400
             let registrationStartTime: BigNumberish = (await eventEndTime()) as BigNumberish
             if (Number(registrationStartTime) > 0)
-                registrationStartTime = (Number(registrationStartTime) - 198000) as BigNumberish
-            let registrationDuration: BigNumberish = 198000
+                registrationStartTime = (Number(registrationStartTime) -
+                    eventDuration) as BigNumberish
+            let registrationDuration: BigNumberish = eventDuration
             setRegistrationDurationForNextRound(registrationDuration.toString())
             const hours = Math.floor(parseInt(registrationDuration.toString()) / 3600)
             const minutes = Math.floor(
