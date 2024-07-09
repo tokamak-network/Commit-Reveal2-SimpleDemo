@@ -144,7 +144,7 @@ export function Register({
                                 <div className="mt-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
                                     <div>
                                         Your current average number is{": "}
-                                        <span className="font-semibold text-3xl">
+                                        <span className="font-bold text-4xl">
                                             {" "}
                                             {averageNumber.toString()}
                                         </span>
