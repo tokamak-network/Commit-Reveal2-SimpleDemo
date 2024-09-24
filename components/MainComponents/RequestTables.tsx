@@ -153,7 +153,6 @@ export function RequestTables({
             const currentBlockTimestamp = Math.floor(Date.now() / 1000)
             const maxWait = Number(getRefundConditionInfosResult[4].toString())
             const revealDuration = Number(getRefundConditionInfosResult[5].toString())
-            console.log(getRefundConditionInfosResult)
             const getRefundRuleNumsForRoundsResult: Number[] = []
             for (let i = 0; i < pendingRequestIds.length; i++) {
                 const commitEndTime = Number(getRefundConditionInfosResult[0][i].toString())
