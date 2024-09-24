@@ -19,7 +19,7 @@ import { Footer } from "../components/Footer"
 import { MainHeader } from "../components/MainComponents/MainHeader"
 import { Register } from "../components/MainComponents/Register"
 import { RequestTables } from "../components/MainComponents/RequestTables"
-import { consumerContractAddress as consumerContractAddressJson, randomDayAbi } from "../constants"
+import { consumerAbi, consumerContractAddress as consumerContractAddressJson } from "../constants"
 
 export default function TempMain() {
     const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
@@ -31,51 +31,34 @@ export default function TempMain() {
             : null
     const [timeRemaining, setTimeRemaining] = useState<string>("00:00:00")
     const [isEventOpen, setIsEventOpen] = useState<boolean>(false)
-    const [avgNumber, setAvgNumber] = useState<BigNumberish>(0)
+    const [totalPoint, setTotalPoint] = useState<BigNumberish>(0)
     const [requestIds, setRequestIds] = useState<BigNumberish[]>([])
+    const [requestStatus, setRequestStatus] = useState<BigNumberish[]>([])
+    const [totalTurns, setTotalTurns] = useState<BigNumberish>(0)
     const [randomNums, setRandomNums] = useState<BigNumberish[]>([])
-    const [threeClosestToSevenHundred, setThreeClosestToSevenHundred] = useState<any>([])
-    const [startRegistrationTimeForNextRound, setStartRegistrationTimeForNextRound] =
-        useState<string>("0")
-    const [prettyStartRegistrationTimeForNextRound, setPrettyStartRegistrationTimeForNextRound] =
-        useState<string>("1. 1. 오전 9:00:00")
-    const [prettyRegistrationDurationForNextRound, setPrettyRegistrationDurationForNextRound] =
-        useState<string>("00hrs 00min 00sec")
-    const [registrationDurationForNextRound, setRegistrationDurationForNextRound] =
-        useState<string>("0")
+    const [winnerPoints, setWinnerPoints] = useState<BigNumberish>(0)
+    const [winnerLength, setWinnerLength] = useState<BigNumberish>(0)
+    const [startTime, setStartTime] = useState<string>("0")
+    const [prettyStartTime, setPrettyStartTime] = useState<string>("1. 1. 오전 9:00:00")
+    const [prettyDuration, setPrettyDuration] = useState<string>("00hrs 00min 00sec")
+    const [duration, setDuration] = useState<string>("0")
     function str_pad_left(string: number, pad: string, length: number) {
         return (new Array(length + 1).join(pad) + string).slice(-length)
     }
     // @ts-ignore
-    const { runContractFunction: getRequestersInfos } = useWeb3Contract()
-    // // @ts-ignore
-    // const { runContractFunction: getWithdrawedRounds } = useWeb3Contract()
-    // @ts-ignore
-    // const { runContractFunction: getNextCryptoDiceRound } = useWeb3Contract({
-    //     abi: cryptoDiceConsumerAbi,
-    //     contractAddress: consumerContractAddress!, //,
-    //     functionName: "getNextCryptoDiceRound", //,
-    //     params: {},
-    // })
-    const { runContractFunction: eventEndTime } = useWeb3Contract({
-        abi: randomDayAbi,
+    const { runContractFunction: viewEventInfos } = useWeb3Contract({
+        abi: consumerAbi,
         contractAddress: consumerContractAddress!, //,
-        functionName: "eventEndTime", //,
-        params: {},
-    })
-    const { runContractFunction: getThreeClosestToSevenHundred } = useWeb3Contract({
-        abi: randomDayAbi,
-        contractAddress: consumerContractAddress!, //,
-        functionName: "getThreeClosestToSevenHundred", //,
+        functionName: "viewEventInfos", //,
         params: {},
     })
 
     useInterval(() => {
-        let registrationDurationForNextRoundInt = parseInt(registrationDurationForNextRound)
-        if (parseInt(startRegistrationTimeForNextRound) > 0) {
+        let registrationDurationForNextRoundInt = parseInt(duration)
+        if (parseInt(startTime) >= 0) {
             let _timeRemaing =
                 registrationDurationForNextRoundInt -
-                (Math.floor(Date.now() / 1000) - parseInt(startRegistrationTimeForNextRound))
+                (Math.floor(Date.now() / 1000) - parseInt(startTime))
             if (_timeRemaing > -1) {
                 const hours = Math.floor(_timeRemaing / 3600)
                 const minutes = Math.floor((_timeRemaing - hours * 3600) / 60)
@@ -104,19 +87,20 @@ export default function TempMain() {
 
     async function updateUI() {
         if (consumerContractAddress) {
-            const eventDuration = 86400
-            let registrationStartTime: BigNumberish = (await eventEndTime()) as BigNumberish
+            const getEventInfosResult: any = await viewEventInfos()
+            const eventDuration = 86400 // 24 hours
+            let registrationStartTime: BigNumberish = getEventInfosResult[7]
             if (Number(registrationStartTime) > 0)
                 registrationStartTime = (Number(registrationStartTime) -
                     eventDuration) as BigNumberish
             let registrationDuration: BigNumberish = eventDuration
-            setRegistrationDurationForNextRound(registrationDuration.toString())
+            setDuration(registrationDuration.toString())
             const hours = Math.floor(parseInt(registrationDuration.toString()) / 3600)
             const minutes = Math.floor(
                 (parseInt(registrationDuration.toString()) - hours * 3600) / 60
             )
             const seconds = parseInt(registrationDuration.toString()) - hours * 3600 - minutes * 60
-            setPrettyRegistrationDurationForNextRound(
+            setPrettyDuration(
                 str_pad_left(hours, "0", 2) +
                     "hrs " +
                     str_pad_left(minutes, "0", 2) +
@@ -124,35 +108,17 @@ export default function TempMain() {
                     str_pad_left(seconds, "0", 2) +
                     "sec"
             )
-            setStartRegistrationTimeForNextRound(registrationStartTime.toString())
-            setPrettyStartRegistrationTimeForNextRound(
+            setStartTime(registrationStartTime.toString())
+            setPrettyStartTime(
                 new Date(Number(registrationStartTime.toString()) * 1000).toLocaleString().slice(5)
             )
-            const getRequestersInfosOptions = {
-                abi: randomDayAbi,
-                contractAddress: consumerContractAddress!,
-                functionName: "getRequestersInfos",
-                params: { requester: account },
-            }
-            const getRequestersInfosResult: any = await getRequestersInfos({
-                params: getRequestersInfosOptions,
-                onError: (error) => console.log(error),
-            })
-            setAvgNumber(getRequestersInfosResult[0])
-            setRequestIds(getRequestersInfosResult[1])
-            setRandomNums(getRequestersInfosResult[2])
-            const getThreeClosestToSevenHundredResult = await getThreeClosestToSevenHundred()
-            setThreeClosestToSevenHundred(getThreeClosestToSevenHundredResult)
-            // const participantsLengthfromCallOptions = {
-            //     abi: cryptoDiceConsumerAbi,
-            //     contractAddress: consumerContractAddress!,
-            //     functionName: "getRegisteredCount",
-            //     params: { round: currentRound },
-            // }
-            // const participantsLengthfromCall = (await getRegisteredCount({
-            //     params: participantsLengthfromCallOptions,
-            //     onError: (error) => console.log(error),
-            // })) as BigNumberish
+            setTotalPoint(getEventInfosResult[3])
+            setRequestIds(getEventInfosResult[0])
+            setRandomNums(getEventInfosResult[1])
+            setRequestStatus(getEventInfosResult[2])
+            setTotalTurns(getEventInfosResult[4])
+            setWinnerPoints(getEventInfosResult[5])
+            setWinnerLength(getEventInfosResult[6])
         }
     }
 
@@ -162,17 +128,21 @@ export default function TempMain() {
             <MainHeader />
             <Register
                 timeRemaining={timeRemaining}
-                registrationDurationForNextRound={prettyRegistrationDurationForNextRound}
-                startRegistrationTimeForNextRound={prettyStartRegistrationTimeForNextRound}
+                duration={prettyDuration}
+                startTime={prettyStartTime}
                 updateUI={updateUI}
                 isEventOpen={isEventOpen}
-                averageNumber={avgNumber}
+                totalPoint={totalPoint}
+                myTotalTurns={totalTurns}
+                winnerPoint={winnerPoints}
+                winnerLength={winnerLength}
             />
             <div>
                 <RequestTables
                     requestIds={requestIds}
                     randomNums={randomNums}
-                    threeClosestToSevenHundred={threeClosestToSevenHundred}
+                    requestStatus={requestStatus}
+                    updateUI={updateUI}
                 />
             </div>
             {/* <div>

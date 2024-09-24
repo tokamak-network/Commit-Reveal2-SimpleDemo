@@ -11,163 +11,232 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { BigNumberish } from "ethers"
-import { Table, Tag } from "web3uikit"
+import { BigNumberish, ethers } from "ethers"
+import { decodeError } from "ethers-decode-error"
+import { useEffect, useState } from "react"
+import { useMoralis, useWeb3Contract } from "react-moralis"
+import { Bell, Button, Table, Tag, useNotification } from "web3uikit"
+import {
+    consumerAbi,
+    consumerContractAddress as consumerContractAddressJson,
+    rngCoordinatorAddress as coordinatorAddressJson,
+    rngCoordinatorAbi,
+} from "../../constants"
 import { Container } from "./Container"
 export function RequestTables({
     requestIds,
     randomNums,
-    threeClosestToSevenHundred,
+    requestStatus,
+    updateUI,
 }: {
     requestIds: BigNumberish[]
     randomNums: BigNumberish[]
-    threeClosestToSevenHundred: any
+    requestStatus: BigNumberish[]
+    updateUI: () => Promise<void>
 }) {
+    const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
+    const chainId = parseInt(chainIdHex!)
+    const contractAddresses: { [key: string]: string[] } = consumerContractAddressJson
+    const consumerAddress =
+        chainId in contractAddresses
+            ? contractAddresses[chainId][contractAddresses[chainId].length - 1]
+            : null
+
+    const coordinatorAddresses: { [key: string]: string[] } = coordinatorAddressJson
+    const coordinatorAddress =
+        chainId in coordinatorAddresses
+            ? coordinatorAddresses[chainId][coordinatorAddresses[chainId].length - 1]
+            : null
+
+    const [tableContents, setTableContents] = useState<any>([])
+    const [isFetching, setIsFetching] = useState<boolean>(false)
+    const getTableContents: any = []
     const getSecondTableContens: any = []
-    function getPrizeAmount(threeClosestToSevenHundred: any) {
-        if (threeClosestToSevenHundred == undefined) return
-        const rticks = []
-        const gaps = [1000, 1000, 1000, 1000]
-        for (let i = 0; i < threeClosestToSevenHundred[0]?.length; i++) {
-            if (threeClosestToSevenHundred[0][i].toString() != "1001") {
-                getSecondTableContens.push([
-                    threeClosestToSevenHundred[0][i].toString(),
-                    threeClosestToSevenHundred[1][i].toString(),
-                ])
-                rticks.push(threeClosestToSevenHundred[0][i])
-                gaps[i] = Math.abs(Number(threeClosestToSevenHundred[0][i]) - 700)
-            }
+    const getPoint = (randomNumber: number, requestStatus: number) => {
+        if (requestStatus === 2) {
+            if (randomNumber === 0) return 100
+            else if (randomNumber < 4) return 30
+            else if (randomNumber < 14) return 20
+            else if (randomNumber < 54) return 10
+            else if (randomNumber < 100) return -5
         }
-        const counts: any = threeClosestToSevenHundred[1] as any
-        const TOTALPRIZE = 1000
-        const FIRSTPRIZE = 550
-        const SECONDPRIZE = 300
-        const THIRDPRIZE = 150
-        if (counts == undefined) return
-        if (getSecondTableContens.length < 1) return
-        if (gaps[0] == gaps[1]) {
-            const firstCount = Number(counts[0].toString()) + Number(counts[1].toString())
-            if (firstCount > 2) {
-                const eachPrize = Math.floor(TOTALPRIZE / firstCount)
-                if (getSecondTableContens.length < 2) return
-                for (let i = 0; i < 2; i++) {
-                    getSecondTableContens[i].push(eachPrize.toString() + " TON")
-                }
-                return
-            } else if (firstCount == 2) {
-                if (getSecondTableContens.length < 2) return
-                const eachPrize = Math.floor((FIRSTPRIZE + SECONDPRIZE) / 2)
-                getSecondTableContens[0].push(eachPrize.toString() + " TON")
-                getSecondTableContens[1].push(eachPrize.toString() + " TON")
-                if (getSecondTableContens.length < 3) return
-                if (gaps[2] == gaps[3]) {
-                    const thirdCount = Number(counts[2].toString()) + Number(counts[3].toString())
-                    const eachPrize = Math.floor(THIRDPRIZE / thirdCount)
-                    if (getSecondTableContens.length < 4) return
-                    for (let i = 2; i < 4; i++) {
-                        getSecondTableContens[i].push(eachPrize.toString() + " TON")
-                    }
-                    return
-                } else {
-                    if (getSecondTableContens.length < 3) return
-                    const thirdCount = Number(counts[2].toString())
-                    const eachPrize = Math.floor(THIRDPRIZE / thirdCount)
-                    if (getSecondTableContens.length < 3) return
-                    getSecondTableContens[2].push(eachPrize.toString() + " TON")
-                    return
-                }
-            }
-        } else {
-            const firstCount = Number(counts[0].toString())
-            if (getSecondTableContens.length < 1) return
-            if (firstCount > 2) {
-                const eachPrize = Math.floor(TOTALPRIZE / firstCount)
-                if (getSecondTableContens.length < 1) return
-                getSecondTableContens[0].push(eachPrize.toString() + " TON")
-                return
-            } else if (firstCount == 2) {
-                const eachPrize = Math.floor((FIRSTPRIZE + SECONDPRIZE) / 2)
-                if (getSecondTableContens.length < 2) return
-                getSecondTableContens[0].push(eachPrize.toString() + " TON")
-                if (gaps[1] == gaps[2]) {
-                    if (getSecondTableContens.length < 3) return
-                    const secondCount = Number(counts[1].toString()) + Number(counts[2].toString())
-                    const eachPrize = Math.floor(THIRDPRIZE / secondCount)
-                    if (getSecondTableContens.length < 3) return
-                    for (let i = 1; i < 3; i++) {
-                        getSecondTableContens[i].push(eachPrize.toString() + " TON")
-                    }
-                    return
-                } else {
-                    const secondCount = Number(counts[1].toString())
-                    if (getSecondTableContens.length < 2) return
-                    if (secondCount > 1) {
-                        const eachPrize = Math.floor(THIRDPRIZE / secondCount)
-                        getSecondTableContens[1].push(eachPrize.toString() + " TON")
-                        return
-                    } else if (secondCount == 1) {
-                        getSecondTableContens[1].push(THIRDPRIZE.toString() + " TON")
-                    }
-                }
-            } else {
-                if (getSecondTableContens.length < 1) return
-                getSecondTableContens[0].push(FIRSTPRIZE.toString() + " TON")
-                if (gaps[1] == gaps[2]) {
-                    const secondCount = Number(counts[1].toString()) + Number(counts[2].toString())
-                    const eachPrize = Math.floor((SECONDPRIZE + THIRDPRIZE) / secondCount)
-                    if (getSecondTableContens.length < 3) return
-                    for (let i = 1; i < 3; i++) {
-                        getSecondTableContens[i].push(eachPrize.toString() + " TON")
-                    }
-                    return
-                } else {
-                    const secondCount = Number(counts[1].toString())
-                    if (secondCount > 1) {
-                        const eachPrize = Math.floor((SECONDPRIZE + THIRDPRIZE) / secondCount)
-                        if (getSecondTableContens.length < 2) return
-                        getSecondTableContens[1].push(eachPrize.toString() + " TON")
-                        return
-                    } else if (secondCount == 1) {
-                        if (getSecondTableContens.length < 2) return
-                        getSecondTableContens[1].push(SECONDPRIZE.toString() + " TON")
-                        if (gaps[2] == gaps[3]) {
-                            const thirdCount =
-                                Number(counts[2].toString()) + Number(counts[3].toString())
-                            const eachPrize = Math.floor(THIRDPRIZE / thirdCount)
-                            if (getSecondTableContens.length < 4) return
-                            for (let i = 2; i < 4; i++) {
-                                getSecondTableContens[i].push(eachPrize.toString() + " TON")
-                            }
-                            return
-                        } else {
-                            const thirdCount = Number(counts[2].toString())
-                            if (thirdCount > 1) {
-                                const eachPrize = Math.floor(THIRDPRIZE / thirdCount)
-                                if (getSecondTableContens.length < 3) return
-                                getSecondTableContens[2].push(eachPrize.toString() + " TON")
-                                return
-                            } else if (thirdCount == 1) {
-                                if (getSecondTableContens.length < 3) return
-                                getSecondTableContens[2].push(THIRDPRIZE.toString() + " TON")
-                            }
-                        }
-                    }
-                }
-            }
+        return null
+    }
+    const pendingRequestIds: any = []
+    for (let i = 0; i < requestIds.length; i++) {
+        if (requestStatus[i].toString() === "1") {
+            pendingRequestIds.push(requestIds[i])
         }
+    }
+    const dispatch = useNotification()
+    // @ts-ignore
+    const { runContractFunction: getRefundRuleNumsForRounds } = useWeb3Contract()
+    // @ts-ignore
+    const { runContractFunction: getRefundConditionInfos } = useWeb3Contract()
+
+    const getRefundFunction = async (requestId: BigNumberish) => {
+        setIsFetching(true)
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum, "any")
+        // Prompt user for account connections
+        await provider.send("eth_requestAccounts", [])
+        const signer = provider.getSigner()
+        const consumerContract = new ethers.Contract(consumerAddress!, consumerAbi, provider)
+        try {
+            const tx = await consumerContract
+                .connect(signer)
+                .getRefund(requestId, { gasLimit: 186411 })
+            await handleSuccess(tx)
+        } catch (error: any) {
+            console.log(error.message)
+            const decodedError = decodeError(decodeError(error))
+            setIsFetching(false)
+            dispatch({
+                type: "error",
+                message: decodedError.error,
+                title: "Error Message",
+                position: "topR",
+                icon: <Bell />,
+            })
+        }
+    }
+    const handleSuccess = async function (tx: any) {
+        await tx.wait(1)
+        handleNewNotification()
+        setTimeout(() => {
+            setIsFetching(false)
+        }, 6000)
+        await updateUI()
+    }
+    const handleNewNotification = function () {
+        setTimeout(() => {
+            dispatch({
+                type: "info",
+                message: "Transaction Completed",
+                title: "Tx Notification",
+                position: "topR",
+                icon: <Bell />,
+            })
+        }, 6000)
     }
 
-    const getTableContents: any = []
-    for (let i = 0; i < requestIds?.length; i++) {
-        getTableContents.push([requestIds[i].toString()])
+    const getRefundRuleNumsForRoundsFunction = async () => {
+        setTableContents(getTableContents)
+        if (pendingRequestIds.length !== 0) {
+            const getRefundRuleNumsForRoundsOptions = {
+                abi: rngCoordinatorAbi,
+                contractAddress: coordinatorAddress!,
+                functionName: "getRefundRuleNumsForRounds",
+                params: {
+                    rounds: pendingRequestIds,
+                },
+            }
+            // const getRefundRuleNumsForRoundsResult: any = await getRefundRuleNumsForRounds({
+            //     params: getRefundRuleNumsForRoundsOptions,
+            //     onError: (error: any) => console.log(error),
+            // })
+            const getRefundConditionInfosOptions = {
+                abi: rngCoordinatorAbi,
+                contractAddress: coordinatorAddress!,
+                functionName: "getRefundConditionInfos",
+                params: {
+                    rounds: pendingRequestIds,
+                },
+            }
+            const getRefundConditionInfosResult: any = await getRefundConditionInfos({
+                params: getRefundConditionInfosOptions,
+                onError: (error: any) => {
+                    console.log(error)
+                    return
+                },
+            })
+
+            const currentBlockTimestamp = Math.floor(Date.now() / 1000)
+            const maxWait = Number(getRefundConditionInfosResult[4].toString())
+            const revealDuration = Number(getRefundConditionInfosResult[5].toString())
+            console.log(getRefundConditionInfosResult)
+            const getRefundRuleNumsForRoundsResult: Number[] = []
+            for (let i = 0; i < pendingRequestIds.length; i++) {
+                const commitEndTime = Number(getRefundConditionInfosResult[0][i].toString())
+                const commitLength = Number(getRefundConditionInfosResult[1][i].toString())
+                const revealLength = Number(getRefundConditionInfosResult[2][i].toString())
+                const requestedTime = Number(getRefundConditionInfosResult[3][i].toString())
+                if (currentBlockTimestamp > requestedTime + maxWait && commitLength == 0)
+                    getRefundRuleNumsForRoundsResult.push(1)
+                else if (commitLength > 0) {
+                    if (commitLength < 2 && currentBlockTimestamp > commitEndTime)
+                        getRefundRuleNumsForRoundsResult.push(2)
+                    else if (
+                        currentBlockTimestamp > commitEndTime + revealDuration &&
+                        revealLength < commitLength
+                    )
+                        getRefundRuleNumsForRoundsResult.push(3)
+                    else getRefundRuleNumsForRoundsResult.push(0)
+                } else {
+                    getRefundRuleNumsForRoundsResult.push(0)
+                }
+            }
+            let j = 0
+            if (getTableContents.length === requestIds.length) {
+                for (let i = 0; i < requestIds.length; i++) {
+                    if (requestStatus[i].toString() === "1") {
+                        if (
+                            getRefundRuleNumsForRoundsResult[j].toString() === "2" ||
+                            getRefundRuleNumsForRoundsResult[j].toString() === "3"
+                        ) {
+                            j++
+                            getTableContents[i].push(
+                                <Button
+                                    color="red"
+                                    onClick={() => {
+                                        setIsFetching(true)
+                                        getRefundFunction(requestIds[i])
+                                    }}
+                                    text="get refund"
+                                    theme="colored"
+                                    disabled={isFetching}
+                                    isLoading={isFetching}
+                                />
+                            )
+                            getTableContents[i][1] = <Tag text="Failed to generate" color="red" />
+                        }
+                    } else {
+                        getTableContents[i].push(<span></span>)
+                    }
+                }
+                setTableContents(getTableContents)
+            }
+        }
     }
-    for (let i = 0; i < randomNums?.length; i++) {
-        getTableContents[i].push(<Tag color="blue" text="fulfilled" />, randomNums[i].toString())
+    useEffect(() => {
+        getRefundRuleNumsForRoundsFunction()
+    }, [requestIds])
+
+    for (let i = 0; i < requestIds.length; i++) {
+        getTableContents.push([
+            requestIds[i].toString(),
+            <span>
+                {requestStatus[i].toString() === "1" ? (
+                    <Tag text="Pending" color="yellow" />
+                ) : requestStatus[i].toString() === "2" ? (
+                    <Tag text="Fulfilled" color="blue" />
+                ) : (
+                    <Tag text="Refunded" color="red" />
+                )}
+            </span>,
+            <span>
+                {requestStatus[i].toString() === "2"
+                    ? Number(randomNums[i].toString().slice(-2))
+                    : null}
+            </span>,
+            <span>
+                {getPoint(
+                    Number(randomNums[i].toString().slice(-2)),
+                    Number(requestStatus[i].toString())
+                )}
+            </span>,
+        ])
     }
-    for (let i = randomNums.length; i < requestIds?.length; i++) {
-        getTableContents[i].push(<Tag color="red" text="pending" />, "")
-    }
-    getPrizeAmount(threeClosestToSevenHundred)
+
     return (
         <div>
             <Container className="relative pb-3.5">
@@ -178,12 +247,14 @@ export function RequestTables({
                             <div>My Request Info</div>
                         </div>
                         <Table
-                            columnsConfig="1fr 1fr 1fr"
-                            data={getTableContents}
+                            columnsConfig="1fr 1fr 1fr 1fr 1fr"
+                            data={tableContents}
                             header={[
                                 <span>RequestId</span>,
                                 <span>Status</span>,
                                 <span>RandomNumber</span>,
+                                <span>Point</span>,
+                                <span></span>,
                             ]}
                             isColumnSortable={[true, false, false]}
                             maxPages={Math.ceil(requestIds.length / 5)}
@@ -202,7 +273,7 @@ export function RequestTables({
                             <div>Currently eligible for prizes</div>
                         </div>
                         <Table
-                            columnsConfig="1fr 1fr 1fr"
+                            columnsConfig="1fr 1fr 1fr 1fr"
                             data={getSecondTableContens}
                             header={[
                                 <span>Random Number</span>,
