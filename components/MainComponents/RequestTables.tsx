@@ -84,7 +84,7 @@ export function RequestTables({
         try {
             const tx = await consumerContract
                 .connect(signer)
-                .getRefund(requestId, { gasLimit: 186411 })
+                .getRefund(requestId, { gasLimit: 200000 })
             await handleSuccess(tx)
         } catch (error: any) {
             console.log(error.message)

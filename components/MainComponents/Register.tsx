@@ -105,7 +105,7 @@ export function Register({
             const directFundingCostInt = Math.floor(Number(directFundingCost.toString()))
             const tx = await consumerContract
                 .connect(signer)
-                .play({ gasLimit: 600000, value: directFundingCostInt })
+                .play({ gasLimit: 1000000, value: directFundingCostInt })
             await handleSuccess(tx)
         } catch (error: any) {
             console.log(error.message)
