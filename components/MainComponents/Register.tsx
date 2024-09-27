@@ -179,7 +179,9 @@ export function Register({
                                     Your total score {" : "}
                                     <span className="font-bold text-4xl">
                                         {" "}
-                                        {totalPoint.toString()}
+                                        {Number(myTotalTurns.toString()) > 10
+                                            ? 0
+                                            : totalPoint.toString()}
                                     </span>
                                 </div>
                                 <div className="mt-2 space-y-6 font-display text-2xl tracking-tight text-blue-900">
