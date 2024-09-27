@@ -195,14 +195,17 @@ export function Register({
                                     <Button
                                         className={
                                             "mt-10 w-full " +
-                                            (!isEventOpen || myTotalTurns.toString() === "10"
+                                            (!isEventOpen ||
+                                            myTotalTurns.toString() === "10" ||
+                                            Number(myTotalTurns.toString()) > 10
                                                 ? "opacity-20"
                                                 : "")
                                         }
                                         disabled={
                                             !isEventOpen ||
                                             isFetching ||
-                                            myTotalTurns.toString() === "10"
+                                            myTotalTurns.toString() === "10" ||
+                                            Number(myTotalTurns.toString()) > 10
                                                 ? true
                                                 : false
                                         }
@@ -214,6 +217,8 @@ export function Register({
                                             <div>
                                                 {myTotalTurns.toString() === "10"
                                                     ? "Exhausted all your turns"
+                                                    : Number(myTotalTurns.toString()) > 10
+                                                    ? "You are blacklisted"
                                                     : "Request a Title"}
                                             </div>
                                         )}
