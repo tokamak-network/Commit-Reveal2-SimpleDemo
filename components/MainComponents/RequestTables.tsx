@@ -196,7 +196,7 @@ export function RequestTables({
                                     isLoading={isFetching}
                                 />
                             )
-                            getTableContents[i][1] = <Tag text="Failed to generate" color="red" />
+                            getTableContents[i][1] = <Tag text="Failed" color="red" />
                         }
                     } else {
                         getTableContents[i].push(<span></span>)
