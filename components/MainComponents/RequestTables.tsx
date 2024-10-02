@@ -51,7 +51,6 @@ export function RequestTables({
     const [tableContents, setTableContents] = useState<any>([])
     const [isFetching, setIsFetching] = useState<boolean>(false)
     const getTableContents: any = []
-    const getSecondTableContens: any = []
     const getPoint = (randomNumber: number, requestStatus: number) => {
         if (requestStatus === 2) {
             if (randomNumber === 0) return 100
@@ -62,13 +61,15 @@ export function RequestTables({
         }
         return null
     }
-    const getImage = (randomNumber: number) => {
-        if (randomNumber === 0) return "../../ethereal.png"
-        else if (randomNumber < 4) return "../../platinum.png"
-        else if (randomNumber < 14) return "../../golden.png"
-        else if (randomNumber < 54) return "../../silver.png"
-        else if (randomNumber < 100) return "../../bronze.png"
-        else return ""
+    const getImage = (randomNumber: number, requestStatus: number) => {
+        if (requestStatus === 2) {
+            if (randomNumber === 0) return "../../ethereal.png"
+            else if (randomNumber < 4) return "../../platinum.png"
+            else if (randomNumber < 14) return "../../golden.png"
+            else if (randomNumber < 54) return "../../silver.png"
+            else if (randomNumber < 100) return "../../bronze.png"
+        }
+        return ""
     }
     const pendingRequestIds: any = []
     for (let i = 0; i < requestIds.length; i++) {
@@ -191,7 +192,7 @@ export function RequestTables({
                             getRefundRuleNumsForRoundsResult[j].toString() === "3"
                         ) {
                             j++
-                            getTableContents.push(
+                            getTableContents[i][5] = (
                                 <span className="my-auto">
                                     <Button
                                         color="red"
@@ -209,7 +210,7 @@ export function RequestTables({
                             getTableContents[i][1] = <Tag text="Failed" color="red" />
                         }
                     } else {
-                        getTableContents.push(<span className="my-auto"></span>)
+                        getTableContents[i][5] = <span className="my-auto"></span>
                     }
                 }
                 setTableContents(getTableContents)
@@ -235,7 +236,7 @@ export function RequestTables({
             <span className="my-auto">
                 {requestStatus[i].toString() === "2"
                     ? Number(randomNums[i].toString().slice(-2))
-                    : null}
+                    : ""}
             </span>,
             <span className="my-auto">
                 {getPoint(
@@ -243,25 +244,24 @@ export function RequestTables({
                     Number(requestStatus[i].toString())
                 )}
             </span>,
-            <div className="my-auto">
-                {requestStatus[i].toString() === "2" ? (
-                    <img
-                        src={getImage(Number(randomNums[i].toString().slice(-2)))}
-                        width="70rem"
-                    />
-                ) : (
-                    <span>{""}</span>
-                )}
-            </div>,
+            <span className="my-auto">
+                <img
+                    src={getImage(
+                        Number(randomNums[i].toString().slice(-2)),
+                        Number(requestStatus[i].toString())
+                    )}
+                    width="70rem"
+                />
+            </span>,
+            <span className="my-auto"></span>,
         ])
     }
 
     return (
         <div>
             <Container className="relative pb-3.5">
-                {requestIds.length > 0 ? (
-                    <>
-                        {" "}
+                {tableContents.length > 0 ? (
+                    <div>
                         <div className="mb-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
                             <div>My Request Info</div>
                         </div>
@@ -273,42 +273,18 @@ export function RequestTables({
                                 <span className="my-auto">Status</span>,
                                 <span className="my-auto">RandomNumber</span>,
                                 <span className="my-auto">Point</span>,
-                                <span className="my-auto"></span>,
-                                <span className="my-auto"></span>,
+                                <span className="my-auto"> </span>,
+                                <span className="my-auto"> </span>,
                             ]}
-                            isColumnSortable={[true, false, false]}
-                            maxPages={Math.ceil(requestIds.length / 5)}
+                            isColumnSortable={[true, false, false, false, false, false]}
+                            maxPages={Math.ceil(tableContents.length / 5)}
                             onPageNumberChanged={function noRefCheck() {}}
                             onRowClick={function noRefCheck() {}}
                             pageSize={5}
                         />
-                    </>
+                    </div>
                 ) : (
                     <> </>
-                )}
-
-                {getSecondTableContens.length > 0 ? (
-                    <>
-                        <div className="mt-6 mb-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
-                            <div>Currently eligible for prizes</div>
-                        </div>
-                        <Table
-                            columnsConfig="1fr 1fr 1fr 1fr"
-                            data={getSecondTableContens}
-                            header={[
-                                <span>Random Number</span>,
-                                <span>Number of people with this random number</span>,
-                                <span>Prize Amount</span>,
-                            ]}
-                            isColumnSortable={[false, false, false]}
-                            maxPages={Math.ceil(requestIds.length / 5)}
-                            onPageNumberChanged={function noRefCheck() {}}
-                            onRowClick={function noRefCheck() {}}
-                            pageSize={5}
-                        />
-                    </>
-                ) : (
-                    <></>
                 )}
             </Container>
         </div>
