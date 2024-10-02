@@ -148,8 +148,14 @@ export function Register({
                     {consumerAddress ? (
                         <>
                             {" "}
-                            <h1 className="font-display text-5xl font-bold tracking-tighter text-blue-600 sm:text-7xl ">
-                                Get Rare Title 🎖️
+                            <h1 className="font-display text-5xl font-bold tracking-tighter text-blue-600 sm:text-7xl flex">
+                                <div className="my-auto">Get Rare Title </div>
+                                <img
+                                    src="../ethereal.png"
+                                    alt="ethereal"
+                                    width="110rem"
+                                    className="ml-3 my-auto"
+                                />
                             </h1>
                             {isEventOpen ? (
                                 <div></div>

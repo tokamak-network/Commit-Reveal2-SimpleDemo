@@ -110,7 +110,7 @@ export default function TempMain() {
             )
             setStartTime(registrationStartTime.toString())
             setPrettyStartTime(
-                new Date(Number(registrationStartTime.toString()) * 1000).toLocaleString().slice(5)
+                new Date(Number(registrationStartTime.toString()) * 1000).toLocaleString("en-US")
             )
             setTotalPoint(getEventInfosResult[3])
             setRequestIds(getEventInfosResult[0])

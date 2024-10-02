@@ -62,6 +62,13 @@ export function RequestTables({
         }
         return null
     }
+    const getImage = (randomNumber: number) => {
+        if (randomNumber === 0) return "../../ethereal.png"
+        else if (randomNumber < 4) return "../../platinum.png"
+        else if (randomNumber < 14) return "../../golden.png"
+        else if (randomNumber < 54) return "../../silver.png"
+        else if (randomNumber < 100) return "../../bronze.png"
+    }
     const pendingRequestIds: any = []
     for (let i = 0; i < requestIds.length; i++) {
         if (requestStatus[i].toString() === "1") {
@@ -183,23 +190,25 @@ export function RequestTables({
                             getRefundRuleNumsForRoundsResult[j].toString() === "3"
                         ) {
                             j++
-                            getTableContents[i].push(
-                                <Button
-                                    color="red"
-                                    onClick={() => {
-                                        setIsFetching(true)
-                                        getRefundFunction(requestIds[i])
-                                    }}
-                                    text="get refund"
-                                    theme="colored"
-                                    disabled={isFetching}
-                                    isLoading={isFetching}
-                                />
+                            getTableContents.push(
+                                <span className="my-auto">
+                                    <Button
+                                        color="red"
+                                        onClick={() => {
+                                            setIsFetching(true)
+                                            getRefundFunction(requestIds[i])
+                                        }}
+                                        text="get refund"
+                                        theme="colored"
+                                        disabled={isFetching}
+                                        isLoading={isFetching}
+                                    />
+                                </span>
                             )
                             getTableContents[i][1] = <Tag text="Failed" color="red" />
                         }
                     } else {
-                        getTableContents[i].push(<span></span>)
+                        getTableContents.push(<span className="my-auto"></span>)
                     }
                 }
                 setTableContents(getTableContents)
@@ -212,8 +221,8 @@ export function RequestTables({
 
     for (let i = 0; i < requestIds.length; i++) {
         getTableContents.push([
-            requestIds[i].toString(),
-            <span>
+            <span className="my-auto"> {requestIds[i].toString()} </span>,
+            <span className="my-auto">
                 {requestStatus[i].toString() === "1" ? (
                     <Tag text="Pending" color="yellow" />
                 ) : requestStatus[i].toString() === "2" ? (
@@ -222,16 +231,19 @@ export function RequestTables({
                     <Tag text="Refunded" color="red" />
                 )}
             </span>,
-            <span>
+            <span className="my-auto">
                 {requestStatus[i].toString() === "2"
                     ? Number(randomNums[i].toString().slice(-2))
                     : null}
             </span>,
-            <span>
+            <span className="my-auto">
                 {getPoint(
                     Number(randomNums[i].toString().slice(-2)),
                     Number(requestStatus[i].toString())
                 )}
+            </span>,
+            <span className="my-auto">
+                <img src={getImage(Number(randomNums[i].toString().slice(-2)))} width="70rem" />
             </span>,
         ])
     }
@@ -246,14 +258,15 @@ export function RequestTables({
                             <div>My Request Info</div>
                         </div>
                         <Table
-                            columnsConfig="1fr 1fr 1fr 1fr 1fr"
+                            columnsConfig="1fr 1fr 1fr 1fr 1fr 1fr"
                             data={tableContents}
                             header={[
-                                <span>RequestId</span>,
-                                <span>Status</span>,
-                                <span>RandomNumber</span>,
-                                <span>Point</span>,
-                                <span></span>,
+                                <span className="my-auto">RequestId</span>,
+                                <span className="my-auto">Status</span>,
+                                <span className="my-auto">RandomNumber</span>,
+                                <span className="my-auto">Point</span>,
+                                <span className="my-auto"></span>,
+                                <span className="my-auto"></span>,
                             ]}
                             isColumnSortable={[true, false, false]}
                             maxPages={Math.ceil(requestIds.length / 5)}
