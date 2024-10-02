@@ -243,7 +243,14 @@ export function RequestTables({
                 )}
             </span>,
             <span className="my-auto">
-                <img src={getImage(Number(randomNums[i].toString().slice(-2)))} width="70rem" />
+                {requestStatus[i].toString() === "2" ? (
+                    <img
+                        src={getImage(Number(randomNums[i].toString().slice(-2)))}
+                        width="70rem"
+                    />
+                ) : (
+                    <span> </span>
+                )}
             </span>,
         ])
     }
