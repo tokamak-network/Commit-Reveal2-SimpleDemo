@@ -68,6 +68,7 @@ export function RequestTables({
         else if (randomNumber < 14) return "../../golden.png"
         else if (randomNumber < 54) return "../../silver.png"
         else if (randomNumber < 100) return "../../bronze.png"
+        else return ""
     }
     const pendingRequestIds: any = []
     for (let i = 0; i < requestIds.length; i++) {
@@ -242,16 +243,16 @@ export function RequestTables({
                     Number(requestStatus[i].toString())
                 )}
             </span>,
-            <span className="my-auto">
+            <div className="my-auto">
                 {requestStatus[i].toString() === "2" ? (
                     <img
                         src={getImage(Number(randomNums[i].toString().slice(-2)))}
                         width="70rem"
                     />
                 ) : (
-                    <span> </span>
+                    <span>{""}</span>
                 )}
-            </span>,
+            </div>,
         ])
     }
 
