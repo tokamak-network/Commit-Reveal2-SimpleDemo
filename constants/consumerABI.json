@@ -41,6 +41,13 @@
     },
     {
         "type": "function",
+        "name": "blackList",
+        "inputs": [{ "name": "players", "type": "address[]", "internalType": "address[]" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "claimPrize",
         "inputs": [],
         "outputs": [],
@@ -52,6 +59,30 @@
         "inputs": [{ "name": "requestId", "type": "uint256", "internalType": "uint256" }],
         "outputs": [],
         "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getWinnersInfo",
+        "inputs": [],
+        "outputs": [
+            { "name": "winnerPoint", "type": "int24[]", "internalType": "int24[]" },
+            {
+                "name": "winnerLength",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            },
+            {
+                "name": "prizeAmounts",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            },
+            {
+                "name": "winners",
+                "type": "address[][]",
+                "internalType": "address[][]"
+            }
+        ],
+        "stateMutability": "view"
     },
     {
         "type": "function",
@@ -89,13 +120,6 @@
         "name": "reward",
         "inputs": [],
         "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
-        "name": "rewardClaimed",
-        "inputs": [],
-        "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
         "stateMutability": "view"
     },
     {
@@ -164,13 +188,22 @@
                 "type": "uint8[]",
                 "internalType": "uint8[]"
             },
-            { "name": "totalPoints", "type": "int16", "internalType": "int16" },
+            { "name": "totalPoints", "type": "int24", "internalType": "int24" },
             { "name": "totalTurns", "type": "uint8", "internalType": "uint8" },
-            { "name": "_winnerPoint", "type": "int16", "internalType": "int16" },
+            {
+                "name": "_winnerPoint",
+                "type": "int24[]",
+                "internalType": "int24[]"
+            },
             {
                 "name": "winnerLength",
-                "type": "uint256",
-                "internalType": "uint256"
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            },
+            {
+                "name": "prizeAmounts",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
             },
             { "name": "_gameExpiry", "type": "uint256", "internalType": "uint256" }
         ],
@@ -193,7 +226,7 @@
         "type": "function",
         "name": "viewTotalPoints",
         "inputs": [],
-        "outputs": [{ "name": "totalPoints", "type": "int16", "internalType": "int16" }],
+        "outputs": [{ "name": "totalPoints", "type": "int24", "internalType": "int24" }],
         "stateMutability": "view"
     },
     {
@@ -274,25 +307,6 @@
         ],
         "anonymous": false
     },
-    {
-        "type": "event",
-        "name": "RewardClaimed",
-        "inputs": [
-            {
-                "name": "winners",
-                "type": "address[]",
-                "indexed": false,
-                "internalType": "address[]"
-            },
-            {
-                "name": "reward",
-                "type": "uint256",
-                "indexed": false,
-                "internalType": "uint256"
-            }
-        ],
-        "anonymous": false
-    },
     { "type": "error", "name": "GameNotActive", "inputs": [] },
     { "type": "error", "name": "GameNotExpired", "inputs": [] },
     {
@@ -322,6 +336,7 @@
     },
     { "type": "error", "name": "InvalidReward", "inputs": [] },
     { "type": "error", "name": "NoAmountToWithdraw", "inputs": [] },
+    { "type": "error", "name": "NoWinners", "inputs": [] },
     {
         "type": "error",
         "name": "OnlyCoordinatorCanFulfill",

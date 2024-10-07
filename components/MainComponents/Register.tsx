@@ -37,8 +37,6 @@ export function Register({
     isEventOpen,
     totalPoint,
     myTotalTurns,
-    winnerPoint,
-    winnerLength,
 }: {
     timeRemaining: string
     duration: string
@@ -47,8 +45,6 @@ export function Register({
     isEventOpen: boolean
     totalPoint: BigNumberish
     myTotalTurns: BigNumberish
-    winnerPoint: BigNumberish
-    winnerLength: BigNumberish
 }) {
     const { chainId: chainIdHex } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -165,22 +161,6 @@ export function Register({
                                 </div>
                             )}
                             <div>
-                                <div className="mt-7 space-y-6 font-display text-2xl tracking-tight text-green-900">
-                                    Current winner score {" : "}
-                                    <span className="font-bold text-4xl">
-                                        {" "}
-                                        {winnerPoint.toString() == "-100"
-                                            ? "0"
-                                            : winnerPoint.toString()}
-                                    </span>
-                                </div>
-                                <div className="mt-2 space-y-6 font-display text-2xl tracking-tight text-green-900">
-                                    Current number of winners{" : "}
-                                    <span className="font-bold text-4xl">
-                                        {" "}
-                                        {winnerLength.toString()}
-                                    </span>
-                                </div>
                                 <div className="mt-7 space-y-6 font-display text-2xl tracking-tight text-blue-900">
                                     Your total score {" : "}
                                     <span className="font-bold text-4xl">

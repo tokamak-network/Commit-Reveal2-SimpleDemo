@@ -36,8 +36,9 @@ export default function TempMain() {
     const [requestStatus, setRequestStatus] = useState<BigNumberish[]>([])
     const [totalTurns, setTotalTurns] = useState<BigNumberish>(0)
     const [randomNums, setRandomNums] = useState<BigNumberish[]>([])
-    const [winnerPoints, setWinnerPoints] = useState<BigNumberish>(0)
-    const [winnerLength, setWinnerLength] = useState<BigNumberish>(0)
+    const [winnerPoints, setWinnerPoints] = useState<BigNumberish[]>([])
+    const [winnerLengths, setWinnerLengths] = useState<BigNumberish[]>([])
+    const [prizeAmounts, setPrizeAmounts] = useState<BigNumberish[]>([])
     const [startTime, setStartTime] = useState<string>("0")
     const [prettyStartTime, setPrettyStartTime] = useState<string>("1. 1. 오전 9:00:00")
     const [prettyDuration, setPrettyDuration] = useState<string>("00hrs 00min 00sec")
@@ -89,7 +90,7 @@ export default function TempMain() {
         if (consumerContractAddress) {
             const getEventInfosResult: any = await viewEventInfos()
             const eventDuration = 86400 // 24 hours
-            let registrationStartTime: BigNumberish = getEventInfosResult[7]
+            let registrationStartTime: BigNumberish = getEventInfosResult[8]
             if (Number(registrationStartTime) > 0)
                 registrationStartTime = (Number(registrationStartTime) -
                     eventDuration) as BigNumberish
@@ -118,7 +119,8 @@ export default function TempMain() {
             setRequestStatus(getEventInfosResult[2])
             setTotalTurns(getEventInfosResult[4])
             setWinnerPoints(getEventInfosResult[5])
-            setWinnerLength(getEventInfosResult[6])
+            setWinnerLengths(getEventInfosResult[6])
+            setPrizeAmounts(getEventInfosResult[7])
         }
     }
 
@@ -134,8 +136,6 @@ export default function TempMain() {
                 isEventOpen={isEventOpen}
                 totalPoint={totalPoint}
                 myTotalTurns={totalTurns}
-                winnerPoint={winnerPoints}
-                winnerLength={winnerLength}
             />
             <div>
                 <RequestTables
@@ -143,6 +143,9 @@ export default function TempMain() {
                     randomNums={randomNums}
                     requestStatus={requestStatus}
                     updateUI={updateUI}
+                    winnerPoints={winnerPoints}
+                    winnerLengths={winnerLengths}
+                    prizeAmounts={prizeAmounts}
                 />
             </div>
             {/* <div>

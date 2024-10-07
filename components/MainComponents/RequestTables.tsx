@@ -28,11 +28,17 @@ export function RequestTables({
     randomNums,
     requestStatus,
     updateUI,
+    winnerPoints,
+    winnerLengths,
+    prizeAmounts,
 }: {
     requestIds: BigNumberish[]
     randomNums: BigNumberish[]
     requestStatus: BigNumberish[]
     updateUI: () => Promise<void>
+    winnerPoints: BigNumberish[]
+    winnerLengths: BigNumberish[]
+    prizeAmounts: BigNumberish[]
 }) {
     const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis()
     const chainId = parseInt(chainIdHex!)
@@ -49,6 +55,7 @@ export function RequestTables({
             : null
 
     const [tableContents, setTableContents] = useState<any>([])
+    const [secondTableContents, setSecondTableContents] = useState<any>([])
     const [isFetching, setIsFetching] = useState<boolean>(false)
     const getTableContents: any = []
     const getPoint = (randomNumber: number, requestStatus: number) => {
@@ -219,6 +226,17 @@ export function RequestTables({
     }
     useEffect(() => {
         getRefundRuleNumsForRoundsFunction()
+        const winnerInfo: any = []
+        for (let i = 0; i < winnerPoints.length; i++) {
+            if (winnerLengths[i].toString() === "0") break
+            winnerInfo.push([
+                i + 1,
+                winnerPoints[i].toString(),
+                winnerLengths[i].toString(),
+                (Number(prizeAmounts[i].toString()) / 10 ** 18).toString() + " TON",
+            ])
+        }
+        setSecondTableContents(winnerInfo)
     }, [requestIds])
 
     for (let i = 0; i < requestIds.length; i++) {
@@ -284,7 +302,31 @@ export function RequestTables({
                         />
                     </div>
                 ) : (
-                    <> </>
+                    <div> </div>
+                )}
+                {secondTableContents.length > 0 ? (
+                    <div>
+                        <div className="mb-6 space-y-6 font-display text-2xl tracking-tight text-blue-900">
+                            <div>Winners Info, Total Prize : 1000 TON</div>
+                        </div>
+                        <Table
+                            columnsConfig="1fr 1fr 1fr 1fr"
+                            data={secondTableContents}
+                            header={[
+                                <span className="my-auto">Ranking</span>,
+                                <span className="my-auto">Winner Score</span>,
+                                <span className="my-auto">Number of Winners</span>,
+                                <span className="my-auto">Prize Amount</span>,
+                            ]}
+                            isColumnSortable={[true, false, false, false]}
+                            maxPages={Math.ceil(secondTableContents.length / 5)}
+                            onPageNumberChanged={function noRefCheck() {}}
+                            onRowClick={function noRefCheck() {}}
+                            pageSize={5}
+                        />
+                    </div>
+                ) : (
+                    <div> </div>
                 )}
             </Container>
         </div>
