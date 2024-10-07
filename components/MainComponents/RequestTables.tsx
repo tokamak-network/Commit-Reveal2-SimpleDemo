@@ -290,7 +290,7 @@ export function RequestTables({
                                 <span className="my-auto">RequestId</span>,
                                 <span className="my-auto">Status</span>,
                                 <span className="my-auto">RandomNumber</span>,
-                                <span className="my-auto">Point</span>,
+                                <span className="my-auto">Score</span>,
                                 <span className="my-auto"> </span>,
                                 <span className="my-auto"> </span>,
                             ]}
