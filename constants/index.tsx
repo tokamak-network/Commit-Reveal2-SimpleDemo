@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-export { default as consumerAbi } from "./consumerABI.json"
-export { default as consumerContractAddress } from "./consumerContractAddress.json"
-export { default as rngCoordinatorAbi } from "./rngCoordinatorABI.json"
-export { default as rngCoordinatorAddress } from "./rngCoordinatorAddress.json"
+export { default as commitReveal2Abi } from "./commitReveal2ABI.json"
+export { default as commitReveal2Address } from "./commitReveal2Address.json"
+export { default as consumerExampleAbi } from "./consumerExampleABI.json"
+export { default as consumerExampleAddress } from "./consumerExampleAddress.json"

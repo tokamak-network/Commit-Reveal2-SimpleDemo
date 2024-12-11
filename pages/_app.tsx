@@ -1,8 +1,8 @@
-import "../styles/globals.css"
-import { MoralisProvider } from "react-moralis"
-import { NotificationProvider } from "web3uikit"
 import type { AppProps } from "next/app"
 import Head from "next/head"
+import { MoralisProvider } from "react-moralis"
+import { NotificationProvider } from "web3uikit"
+import "../styles/globals.css"
 
 function MyApp({ Component, pageProps }: AppProps) {
     return (
@@ -10,8 +10,8 @@ function MyApp({ Component, pageProps }: AppProps) {
             <MoralisProvider initializeOnMount={false}>
                 <NotificationProvider>
                     <Head>
-                        <title>TON Random Airdrop</title>
-                        <meta name="description" content="RandomAirdrop using Commit-Recover" />
+                        <title>Commit-Reveal2 Simple Demo</title>
+                        <meta name="description" content="Simple Demo using Commit-Recover2" />
                         <link rel="icon" href="../tokamaklogo.png" />
                     </Head>
                     <Component {...pageProps} />
