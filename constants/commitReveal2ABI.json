@@ -1,0 +1,493 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "activationThreshold",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            { "name": "flatFee", "type": "uint256", "internalType": "uint256" },
+            {
+                "name": "maxActivatedOperators",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            { "name": "name", "type": "string", "internalType": "string" },
+            { "name": "version", "type": "string", "internalType": "string" }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "activate",
+        "inputs": [{ "name": "operator", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "activate",
+        "inputs": [
+            {
+                "name": "operators",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "deactivate",
+        "inputs": [{ "name": "operator", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "deactivate",
+        "inputs": [
+            {
+                "name": "operators",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "deposit",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "eip712Domain",
+        "inputs": [],
+        "outputs": [
+            { "name": "fields", "type": "bytes1", "internalType": "bytes1" },
+            { "name": "name", "type": "string", "internalType": "string" },
+            { "name": "version", "type": "string", "internalType": "string" },
+            { "name": "chainId", "type": "uint256", "internalType": "uint256" },
+            {
+                "name": "verifyingContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            { "name": "salt", "type": "bytes32", "internalType": "bytes32" },
+            {
+                "name": "extensions",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "estimateRequestPrice",
+        "inputs": [
+            {
+                "name": "callbackGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            { "name": "gasPrice", "type": "uint256", "internalType": "uint256" }
+        ],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "generateRandomNumber",
+        "inputs": [
+            { "name": "round", "type": "uint256", "internalType": "uint256" },
+            { "name": "secrets", "type": "bytes32[]", "internalType": "bytes32[]" },
+            { "name": "vs", "type": "uint8[]", "internalType": "uint8[]" },
+            { "name": "rs", "type": "bytes32[]", "internalType": "bytes32[]" },
+            { "name": "ss", "type": "bytes32[]", "internalType": "bytes32[]" }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getActivatedOperators",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getActivatedOperatorsAtRound",
+        "inputs": [{ "name": "round", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getActivatedOperatorsAtRoundLength",
+        "inputs": [{ "name": "round", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getActivatedOperatorsLength",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getL1FeeCalculationMode",
+        "inputs": [],
+        "outputs": [
+            { "name": "mode", "type": "uint8", "internalType": "uint8" },
+            { "name": "coefficient", "type": "uint8", "internalType": "uint8" }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getMerkleRoot",
+        "inputs": [{ "name": "leaves", "type": "bytes32[]", "internalType": "bytes32[]" }],
+        "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getMessageHash",
+        "inputs": [
+            { "name": "round", "type": "uint256", "internalType": "uint256" },
+            { "name": "cv", "type": "bytes32", "internalType": "bytes32" }
+        ],
+        "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "renounceOwnership",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "requestRandomNumber",
+        "inputs": [
+            {
+                "name": "callbackGasLimit",
+                "type": "uint32",
+                "internalType": "uint32"
+            }
+        ],
+        "outputs": [{ "name": "round", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "s_activatedOperatorOrder",
+        "inputs": [{ "name": "operator", "type": "address", "internalType": "address" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_activatedOperatorOrderAtRound",
+        "inputs": [
+            { "name": "round", "type": "uint256", "internalType": "uint256" },
+            { "name": "operator", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_activationThreshold",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_depositAmount",
+        "inputs": [{ "name": "operator", "type": "address", "internalType": "address" }],
+        "outputs": [
+            {
+                "name": "depositAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_flatFee",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_maxActivatedOperators",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_requestInfo",
+        "inputs": [{ "name": "round", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [
+            { "name": "consumer", "type": "address", "internalType": "address" },
+            {
+                "name": "requestedTime",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            { "name": "cost", "type": "uint256", "internalType": "uint256" },
+            {
+                "name": "callbackGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "s_roundInfo",
+        "inputs": [{ "name": "round", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [
+            { "name": "merkleRoot", "type": "bytes32", "internalType": "bytes32" },
+            {
+                "name": "randomNumber",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            { "name": "fulfillSucceeded", "type": "bool", "internalType": "bool" }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "setL1FeeCalculation",
+        "inputs": [
+            { "name": "mode", "type": "uint8", "internalType": "uint8" },
+            { "name": "coefficient", "type": "uint8", "internalType": "uint8" }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "submitMerkleRoot",
+        "inputs": [
+            { "name": "round", "type": "uint256", "internalType": "uint256" },
+            { "name": "merkleRoot", "type": "bytes32", "internalType": "bytes32" }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "transferOwnership",
+        "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "withdraw",
+        "inputs": [{ "name": "amount", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "event",
+        "name": "Activated",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "DeActivated",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "EIP712DomainChanged",
+        "inputs": [],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "L1FeeCalculationSet",
+        "inputs": [
+            {
+                "name": "mode",
+                "type": "uint8",
+                "indexed": false,
+                "internalType": "uint8"
+            },
+            {
+                "name": "coefficient",
+                "type": "uint8",
+                "indexed": false,
+                "internalType": "uint8"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "MerkleRootSubmitted",
+        "inputs": [
+            {
+                "name": "round",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "merkleRoot",
+                "type": "bytes32",
+                "indexed": false,
+                "internalType": "bytes32"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "inputs": [
+            {
+                "name": "previousOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "newOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RandomNumberGenerated",
+        "inputs": [
+            {
+                "name": "round",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "randomNumber",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RandomNumberRequested",
+        "inputs": [
+            {
+                "name": "round",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "activatedOperators",
+                "type": "address[]",
+                "indexed": false,
+                "internalType": "address[]"
+            }
+        ],
+        "anonymous": false
+    },
+    { "type": "error", "name": "ActivatedOperatorsLimitReached", "inputs": [] },
+    { "type": "error", "name": "AlreadyActivated", "inputs": [] },
+    { "type": "error", "name": "AlreadyForceDeactivated", "inputs": [] },
+    { "type": "error", "name": "ExceedCallbackGasLimit", "inputs": [] },
+    { "type": "error", "name": "InsufficientAmount", "inputs": [] },
+    {
+        "type": "error",
+        "name": "InvalidL1FeeCalculationMode",
+        "inputs": [{ "name": "mode", "type": "uint8", "internalType": "uint8" }]
+    },
+    {
+        "type": "error",
+        "name": "InvalidL1FeeCoefficient",
+        "inputs": [{ "name": "coefficient", "type": "uint8", "internalType": "uint8" }]
+    },
+    { "type": "error", "name": "InvalidShortString", "inputs": [] },
+    { "type": "error", "name": "InvalidSignature", "inputs": [] },
+    { "type": "error", "name": "InvalidSignatureLength", "inputs": [] },
+    { "type": "error", "name": "InvalidSignatureS", "inputs": [] },
+    { "type": "error", "name": "LessThanActivationThreshold", "inputs": [] },
+    { "type": "error", "name": "MerkleVerificationFailed", "inputs": [] },
+    {
+        "type": "error",
+        "name": "NotActivatedOperatorForThisRound",
+        "inputs": []
+    },
+    { "type": "error", "name": "NotEnoughActivatedOperators", "inputs": [] },
+    { "type": "error", "name": "NotEnoughParticipatedOperators", "inputs": [] },
+    { "type": "error", "name": "OperatorNotActivated", "inputs": [] },
+    {
+        "type": "error",
+        "name": "OwnableInvalidOwner",
+        "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
+    },
+    {
+        "type": "error",
+        "name": "OwnableUnauthorizedAccount",
+        "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+    },
+    { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
+    { "type": "error", "name": "RevealNotInAscendingOrder", "inputs": [] },
+    {
+        "type": "error",
+        "name": "StringTooLong",
+        "inputs": [{ "name": "str", "type": "string", "internalType": "string" }]
+    }
+]
