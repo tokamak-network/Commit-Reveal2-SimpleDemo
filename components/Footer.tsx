@@ -10,7 +10,7 @@ export function Footer() {
         <Container>
             <div className="flex flex-col items-center border-t border-slate-400/10 py-9 sm:flex-row-reverse sm:justify-between mt-16">
                 <div className="flex py-1">
-                    <Link href="https://github.com/tokamak-network/Commit-Reveal-Recover-RNG">
+                    <Link href="https://github.com/tokamak-network/Commit-Reveal2-SimpleDemo">
                         <a className="group" aria-label="TaxPal on GitHub" target="_blank">
                             <svg
                                 className="h-6 w-6 fill-slate-500 group-hover:fill-slate-700"
