@@ -78,7 +78,6 @@ export function Request({
         const feeData = await provider.getFeeData()
         let gasPrice = feeData.maxFeePerGas
         if (gasPrice == null) gasPrice = feeData.gasPrice
-        console.log(gasPrice?.toString())
         const callbackGasLimit = 82000
         const estimateRequestPriceOption = {
             abi: commitReveal2Abi,
@@ -96,7 +95,6 @@ export function Request({
                 return
             },
         })) as BigNumberish
-        console.log(requestFee.toString())
         const requestRandomNumberOption = {
             abi: consumerExampleAbi,
             contractAddress: consumerContractAddress!,
