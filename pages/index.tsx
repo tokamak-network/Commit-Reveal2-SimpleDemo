@@ -50,9 +50,10 @@ export default function Main() {
             updateUI()
         }
     }, [isWeb3Enabled, account])
-    useInterval(() => {
+
+    useInterval(async () => {
         updateUI()
-    }, 11000)
+    }, 300000)
 
     async function updateUI() {
         if (consumerContractAddress) {
