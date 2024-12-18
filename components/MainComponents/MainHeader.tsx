@@ -53,6 +53,11 @@ export function MainHeader() {
                         </div>
                     </div>
                     <div className="flex items-center gap-x-3 md:gap-x-8">
+                        <Link href="/how-to-become-operator">
+                            <a className="rounded-lg font-semibold underline m-auto text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                                Become an Operator
+                            </a>
+                        </Link>
                         <div className="md:block">
                             <ConnectButton moralisAuth={false} />
                         </div>
