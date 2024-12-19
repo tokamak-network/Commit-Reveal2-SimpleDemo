@@ -168,8 +168,6 @@ export default function HowToBecomeOperator() {
                             Here are the variables you'll need to set:
                         </p>
                         <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                            plaintext{"\n"}
-                            Copy code{"\n"}
                             LEADER_IP=13.49.228.201 # IP address of the leader node{"\n"}
                             LEADER_PORT=61280 # Port for the leader node{"\n"}
                             LEADER_PEER_ID=12D3KooWG5QNHzBv2BghpZ4ZGDa9pHWKzEHi6bEsE5kMCsnR2XSZ #
