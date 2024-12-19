@@ -13,21 +13,11 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-# Christmas Gift Distribution Event Using Commit-Reveal-Recover Random Number Generation(RNG)
-[Example App](https://randomAirdrop-commitRevealRecoverRNG-front.vercel.app/)
-- Currently Works on Sepolia Network
+# Commit-Reveal² Demo
 
-![App](img/EventPage.png)
-![App](img/SetUpPage.png)
-![App](img/TestCasePage.png)
+A demonstration repository for the Commit-Reveal² protocol, showcasing how it simplifies secure and fair randomness generation for blockchain systems. This demo allows you to interact with the protocol by connecting your MetaMask wallet, requesting random numbers, and viewing transaction details. Additional resources, such as a guide on running a node and an explanation of the protocol, are also included to help you get started quickly.
 
-Built with using:
-NextJs
-web3uikit
-Ethers
-Tailwind
-Solidity
-Hardhat
+You can test the application on the **Thanos-Sepolia** network by visiting [rng-demo.vercel.app](https://rng-demo.vercel.app/).
 
 # Getting Started
 ## Requirements
@@ -45,10 +35,10 @@ Hardhat
 
 ## QuickStart
 ```
-git clone https://github.com/tokamak-network/RandomAirdrop-Bicorn-RX-Front.git
-cd RandomAirdrop-Bicorn-RX-Front
+git clone https://github.com/tokamak-network/Commit-Reveal2-SimpleDemo.git
+cd Commit-Reveal2-SimpleDemo
 yarn
-yarn dev
+yarn run dev
 ```
 
 ## Formatting in VSCode
@@ -64,39 +54,19 @@ To have VSCode extension prettier auto-format `.jsx` and `.tsx`, add the followi
   }
 ```
 
-# Usage
-1. Run your local blockchain with the lottery code
+## Usage
+<img src="img/pagescreenshot.png" alt="App" width="600">
 
-> In a different terminal / command line
 
-```
-git clone https://github.com/tokamak-network/RandomAirdrop-Bicorn-RX.git
-cd RandomAirdrop-Bicorn-RX
-yarn 
-yarn hardhat node
-```
-> You can read more about how to use that repo from its [README.md](https://github.com/tokamak-network/RandomAirdrop-Bicorn-RX/blob/main/README.md)
+- **Connect MetaMask**: Use your MetaMask wallet to interact with the application.
+- **Request Random Number**: Click the **Request** button to test the protocol and generate a random number.
+- **View Request Info**: Check your requests and their statuses in the **My Request Info** section.
+  - Click the **Details** button to view transaction and operator details.
+- **Additional Pages**:
+  - **How It Works**: Learn about the Commit-Reveal² protocol.
+  - **Run a Node**: Instructions for running your own node.
 
-2. Add hardhat network to your metamask/wallet
 
-- Get the RPC_URL of your hh node (usually `http://127.0.0.1:8545/`)
-- Go to your wallet and add a new network. [See instructions here.](https://metamask.zendesk.com/hc/en-us/articles/360043227612-How-to-add-a-custom-network-RPC)
-  - Network Name: Hardhat-Localhost
-  - New RPC URL: http://127.0.0.1:8545/
-  - Chain ID: 31337
-  - Currency Symbol: ETH (or GO)
-  - Block Explorer URL: None
+## Contributing
 
-Ideally, you'd then [import one of the accounts](https://metamask.zendesk.com/hc/en-us/articles/360015489331-How-to-import-an-Account) from hardhat to your wallet/metamask. 
-
-3. Run this code
-
-Back in a different terminal with the code from this repo, run:
-
-```
-yarn dev
-```
-
-4. Go to UI and have fun!
-
-Head over to your [localhost](http://localhost:3000) and play with the Christmas Gift Distribution Event!
+Contributions are welcome! Feel free to open issues or submit pull requests to improve this demo.
