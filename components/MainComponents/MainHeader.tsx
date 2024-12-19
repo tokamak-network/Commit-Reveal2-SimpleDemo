@@ -34,7 +34,7 @@ export function MainHeader() {
                         <div className="h-10 w-auto">
                             <Link href="/" key="5">
                                 <a className="flex flex-row items-center">
-                                    <div className="min-w-fit">
+                                    <div className="min-w-fit mt-0.5">
                                         <Image
                                             src="../tokamaklogo.png"
                                             loader={imageLoader}
@@ -43,7 +43,7 @@ export function MainHeader() {
                                             alt="Picture of the author"
                                         />
                                     </div>
-                                    <div className="pl-2 font-bold text-xl mb-2 mr-5">
+                                    <div className="pl-2 font-bold text-xl m-auto">
                                         <span className="hidden lg:inline whitespace-nowrap">
                                             Commit-Reveal2 Simple Demo
                                         </span>
@@ -52,10 +52,15 @@ export function MainHeader() {
                             </Link>
                         </div>
                     </div>
-                    <div className="flex items-center gap-x-3 md:gap-x-8">
-                        <Link href="/how-to-become-operator">
+                    <div className="flex items-center gap-x-3 md:gap-x-8 mt-0.5">
+                        <Link href="/how-it-works">
                             <a className="rounded-lg font-semibold underline m-auto text-slate-500 hover:bg-slate-100 hover:text-slate-900">
-                                Become an Operator
+                                How It Works
+                            </a>
+                        </Link>
+                        <Link href="/run-a-node">
+                            <a className="rounded-lg font-semibold underline m-auto text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                                Run a Node
                             </a>
                         </Link>
                         <div className="md:block">

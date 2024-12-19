@@ -24,6 +24,27 @@ export default function HowToBecomeOperator() {
                         How to Run a Regular Node
                     </h1>
 
+                    {/* What is a Node and Its Role */}
+                    <section className="space-y-4">
+                        <h2 className="text-2xl font-semibold text-gray-800">
+                            What is a Node and Its Role?
+                        </h2>
+                        <p className="text-gray-700 leading-relaxed ml-1">
+                            In the hybrid <span className="font-medium">Commit-Reveal²</span>{" "}
+                            protocol, nodes are participants that generate and reveal secrets to
+                            securely contribute to random number generation. Regular nodes handle
+                            off-chain commitments, reveals, and final secret disclosures, while the
+                            leader node coordinates the process and interacts with the blockchain.
+                        </p>
+                        <p className="text-gray-700 leading-relaxed ml-1">
+                            This hybrid model reduces on-chain operations, ensuring efficiency
+                            while maintaining security and transparency through proofs and
+                            verifiable smart contract interactions. Regular nodes also manage
+                            deposits and adhere to protocol rules to uphold fairness and
+                            correctness.
+                        </p>
+                    </section>
+
                     {/* Preparation Steps */}
                     <section className="space-y-4">
                         <h2 className="text-2xl font-semibold text-gray-800">Preparations</h2>
@@ -54,6 +75,10 @@ export default function HowToBecomeOperator() {
                                     {" "}
                                     Go to Faucet
                                 </a>
+                                <p className="text-gray-700 ml-4">
+                                    (Connect your testnet wallet and send a transaction by clicking
+                                    on "requestTokens")
+                                </p>
                             </li>
                             {/* <li className="ml-4"> */}
                             <div className="ml-4">
@@ -65,11 +90,23 @@ export default function HowToBecomeOperator() {
                                 </ul>
                             </div>
                             {/* </li> */}
-                            <li className="text-gray-700">
+                            <div className="text-gray-700 ml-4">
                                 Faucet accepts one request{" "}
                                 <span className="font-medium">every 24 hours</span> per account. If
                                 you have leftover tokens or ETH, you can send it directly to the
                                 Faucet contract.
+                            </div>
+                            <li>
+                                <span className="font-medium">Deposit TON to Thanos Sepolia:</span>{" "}
+                                Visit the bridge at{" "}
+                                <a
+                                    href="https://trh-op-bridge.vercel.app/bridge"
+                                    className="text-blue-500 hover:underline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    https://trh-op-bridge.vercel.app/bridge
+                                </a>
                             </li>
                         </ul>
                     </section>
@@ -200,8 +237,6 @@ export default function HowToBecomeOperator() {
                             You can run the node directly using the go command:
                         </p>
                         <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                            bash{"\n"}
-                            Copy code{"\n"}
                             go cmd/main.go
                         </pre>
 
@@ -213,14 +248,10 @@ export default function HowToBecomeOperator() {
                             container name and ports in the <code>docker-compose.yml</code> file:
                         </p>
                         <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                            yaml{"\n"}
-                            Copy code{"\n  "}
                             ports:{"\n    "}- "61280:61280" # Adjust this as per your choice
                         </pre>
                         <p className="text-gray-700">Then, build and start the container:</p>
                         <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-sm">
-                            bash{"\n"}
-                            Copy code{"\n"}
                             docker-compose up --build
                         </pre>
                     </section>
