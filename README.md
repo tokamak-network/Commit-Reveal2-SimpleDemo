@@ -66,6 +66,9 @@ To have VSCode extension prettier auto-format `.jsx` and `.tsx`, add the followi
   - **How It Works**: Learn about the Commit-Reveal² protocol.
   - **Run a Node**: Instructions for running your own node.
 
+## Learn More
+
+- **Commit-Reveal² Protocol**: [Explore the Protocol Manuscript](#)
 
 ## Contributing
 
