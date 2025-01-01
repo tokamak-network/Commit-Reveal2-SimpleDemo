@@ -187,7 +187,7 @@ export default function HowToBecomeOperator() {
                             Ethereum RPC{"\n"}
                             CONTRACT_ADDRESS=0x7d12f3421E6ae1D2668Ed10C25873aF3B1b7449f # Address
                             of the smart contract{"\n"}
-                            SUBGRAPH_URL=https://graph-node.thanos-sepolia.tokamak.network/subgraphs/name/commitreveal2
+                            SUBGRAPH_URL=https://graph-node.thanos-sepolia.tokamak.network/subgraphs/name/commitreveal22
                             # Subgraph URL for data queries{"\n"}
                         </pre>
                     </section>

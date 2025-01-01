@@ -7,7 +7,7 @@ import "../styles/globals.css"
 
 const client = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: "https://graph-node.thanos-sepolia.tokamak.network/subgraphs/name/commitreveal2",
+    uri: "https://graph-node.thanos-sepolia.tokamak.network/subgraphs/name/commitreveal22",
 })
 
 function MyApp({ Component, pageProps }: AppProps) {
