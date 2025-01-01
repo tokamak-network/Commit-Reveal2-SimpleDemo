@@ -40,7 +40,9 @@ export function DetailButtonAndModal({ requestId }: { requestId: string }) {
             }
         }
     `
-    const [fetchRoundInfo] = useLazyQuery(getRoundInfo)
+    const [fetchRoundInfo] = useLazyQuery(getRoundInfo, {
+        fetchPolicy: "no-cache",
+    })
     const handleButtonClick = async function () {
         const { loading, error: subgraphQueryError, data: subgraphData } = await fetchRoundInfo()
         setSubgraphData(subgraphData.rounds[0])
