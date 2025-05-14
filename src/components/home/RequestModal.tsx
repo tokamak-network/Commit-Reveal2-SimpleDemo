@@ -1,10 +1,10 @@
- "use client";
+"use client";
 
 import { consumerExampleAbi } from "@/constants";
-import { formatEther } from "viem";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { CgSpinner } from "react-icons/cg";
 import { LuExternalLink } from "react-icons/lu";
+import { formatEther } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface Props {
   requestFee: bigint;
@@ -52,7 +52,7 @@ export default function RequestModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white relative rounded-xl shadow-xl p-6 w-full max-w-md min-h-[200px] space-y-4">
+      <div className="bg-white relative rounded-4xl shadow-xl p-6 w-full max-w-md min-h-[200px] space-y-4">
         <div className="flex items-center justify-between absolute top-4 left-6 right-6">
           <div className="flex-1">
             {!isConfirmed && (
@@ -71,7 +71,9 @@ export default function RequestModal({
         {isConfirmed ? (
           <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
             <div className="text-green-600 text-3xl">✅</div>
-            <p className="text-lg font-semibold text-gray-800">Transaction Confirmed</p>
+            <p className="text-lg font-semibold text-gray-800">
+              Transaction Confirmed
+            </p>
             {hash && (
               <a
                 href={`https://etherscan.io/tx/${hash}`}
@@ -100,7 +102,9 @@ export default function RequestModal({
                   <span className="font-mono">{formattedTotal} ETH</span>
                 </span>
                 <a
-                  href={`https://www.google.com/search?q=${encodeURIComponent(`${formattedTotal} ETH to dollar`)}`}
+                  href={`https://www.google.com/search?q=${encodeURIComponent(
+                    `${formattedTotal} ETH to dollar`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline inline-flex items-center gap-1 text-xs"

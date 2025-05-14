@@ -6,6 +6,7 @@ import {
   consumerExampleAbi,
 } from "@/constants";
 import { useMemo, useState } from "react";
+import { useEffect } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 import { useAccount, useChainId, useReadContracts } from "wagmi";
 import ActivatedNodeList from "./ActivatedNodeList";
@@ -49,6 +50,14 @@ export default function HomeContent() {
       },
     ],
   });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      result.refetch();
+    }, 12000); // 12 seconds
+
+    return () => clearInterval(interval);
+  }, [result]);
 
   const activatedOperators =
     result.status === "success"
