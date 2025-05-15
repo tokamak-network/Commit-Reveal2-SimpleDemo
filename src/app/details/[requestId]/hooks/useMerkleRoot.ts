@@ -1,17 +1,3 @@
-// Copyright 2025 euisingee
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 "use client";
 
 import { chainsToContracts, commitReveal2Abi } from "@/constants";
@@ -21,7 +7,7 @@ import { useChainId, useConfig } from "wagmi";
 
 export function useMerkleRoot(
   startTime: bigint | undefined,
-  refetchKey?: number
+  refreshTrigger?: number // 리프레시 트리거로 사용될 값
 ) {
   const config = useConfig();
   const chainId = useChainId();
@@ -31,16 +17,32 @@ export function useMerkleRoot(
   useEffect(() => {
     if (!startTime || startTime === BigInt(0)) return;
 
-    readContract(config, {
-      abi: commitReveal2Abi,
-      address: contracts.commitReveal2 as `0x${string}`,
-      functionName: "getMerkleRoot",
-      args: [startTime],
-    }).then((res) => {
-      const [root, submitted] = res as [`0x${string}`, boolean];
-      setMerkleRoot(submitted ? root : null);
-    });
-  }, [startTime, config, contracts, refetchKey]);
+    let isMounted = true;
+
+    const fetchMerkleRoot = async () => {
+      try {
+        const res = await readContract(config, {
+          abi: commitReveal2Abi,
+          address: contracts.commitReveal2 as `0x${string}`,
+          functionName: "getMerkleRoot",
+          args: [startTime],
+        });
+
+        if (isMounted) {
+          const [root, submitted] = res as [`0x${string}`, boolean];
+          setMerkleRoot(submitted ? root : null);
+        }
+      } catch (error) {
+        console.error("Error fetching merkle root:", error);
+      }
+    };
+
+    fetchMerkleRoot();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [startTime, config, contracts, refreshTrigger]); // refreshTrigger를 의존성 배열에 추가
 
   return merkleRoot;
 }

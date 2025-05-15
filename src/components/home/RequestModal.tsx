@@ -1,6 +1,7 @@
 "use client";
 
-import { consumerExampleAbi } from "@/constants";
+import { consumerExampleAbi, getExplorerUrl } from "@/constants";
+import { useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { LuExternalLink } from "react-icons/lu";
 import { formatEther } from "viem";
@@ -11,6 +12,7 @@ interface Props {
   networkFee: bigint;
   totalFee: bigint;
   consumerExampleAddress: `0x${string}`;
+  chainId: number;
   onClose: () => void;
 }
 
@@ -19,11 +21,21 @@ export default function RequestModal({
   networkFee,
   totalFee,
   consumerExampleAddress,
+  chainId,
   onClose,
 }: Props) {
   const { data: hash, isPending, writeContractAsync } = useWriteContract();
+  const [currentRequestFee, setCurrentRequestFee] = useState(requestFee);
+  const [currentNetworkFee, setCurrentNetworkFee] = useState(networkFee);
+  const [currentTotalFee, setCurrentTotalFee] = useState(totalFee);
 
-  const aa = useWriteContract();
+  // Update fee values when they change from parent component
+  useEffect(() => {
+    setCurrentRequestFee(requestFee);
+    setCurrentNetworkFee(networkFee);
+    setCurrentTotalFee(totalFee);
+  }, [requestFee, networkFee, totalFee]);
+
   const {
     isLoading: isConfirming,
     isSuccess: isConfirmed,
@@ -35,7 +47,7 @@ export default function RequestModal({
     hash,
   });
 
-  const formattedTotal = formatEther(totalFee);
+  const formattedTotal = formatEther(currentTotalFee);
 
   async function handleSendTransaction() {
     try {
@@ -43,7 +55,7 @@ export default function RequestModal({
         abi: consumerExampleAbi,
         address: consumerExampleAddress,
         functionName: "requestRandomNumber",
-        value: requestFee,
+        value: currentRequestFee,
       });
     } catch (err) {
       console.error(err);
@@ -74,26 +86,37 @@ export default function RequestModal({
             <p className="text-lg font-semibold text-gray-800">
               Transaction Confirmed
             </p>
-            {hash && (
-              <a
-                href={`https://etherscan.io/tx/${hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm inline-flex items-center gap-1"
-              >
-                View on Etherscan <LuExternalLink size={12} />
-              </a>
-            )}
+            {hash &&
+              (() => {
+                const explorerUrl = getExplorerUrl(chainId, `tx/${hash}`);
+                return (
+                  <a
+                    href={explorerUrl}
+                    onClick={(e) => {
+                      if (explorerUrl === "#") e.preventDefault();
+                    }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm inline-flex items-center gap-1"
+                  >
+                    View on Explorer <LuExternalLink size={12} />
+                  </a>
+                );
+              })()}
           </div>
         ) : (
           <div className="text-[15px] text-gray-700 space-y-1 pt-12 text-left">
             <p>
               Request Fee:{" "}
-              <span className="font-mono">{formatEther(requestFee)} ETH</span>
+              <span className="font-mono">
+                {formatEther(currentRequestFee)} ETH
+              </span>
             </p>
             <p>
               Network Fee:{" "}
-              <span className="font-mono">{formatEther(networkFee)} ETH</span>
+              <span className="font-mono">
+                {formatEther(currentNetworkFee)} ETH
+              </span>
             </p>
             <div className="border-t border-gray-200 pt-2 mt-2">
               <div className="flex items-center justify-between">
@@ -129,10 +152,12 @@ export default function RequestModal({
           </button>
         ) : (
           <button
-            onClick={handleSendTransaction}
+            onClick={isError ? onClose : handleSendTransaction}
             className={
               isPending || isConfirming
                 ? "w-full px-4 py-2 bg-blue-400 text-white rounded-lg text-sm cursor-not-allowed"
+                : isError
+                ? "w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm cursor-pointer"
                 : "w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm cursor-pointer"
             }
             disabled={isPending || isConfirming}
@@ -148,7 +173,7 @@ export default function RequestModal({
                 <span>Waiting for tx...</span>
               </div>
             ) : isError ? (
-              <span>Error</span>
+              <span>Close</span>
             ) : (
               "Send a Transaction"
             )}

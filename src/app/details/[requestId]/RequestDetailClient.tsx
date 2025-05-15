@@ -6,7 +6,7 @@ import {
   consumerExampleAbi,
 } from "@/constants";
 import { getBlock, type GetBlockReturnType } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 import { useAccount, useChainId, useConfig, useReadContracts } from "wagmi";
 import EmptyStateMessage from "./components/EmptyStateMessage";
@@ -27,35 +27,37 @@ export default function RequestDetailClient({
   const { isConnected, address } = useAccount();
   const chainId = useChainId();
   const contracts = useMemo(() => chainsToContracts[chainId], [chainId]);
-  const commitReveal2Contract = {
-    address: contracts.commitReveal2 as `0x${string}`,
-    abi: commitReveal2Abi,
-    account: address,
-  } as const;
-  const consumerExampleContract = {
-    address: contracts.consumerExample as `0x${string}`,
-    abi: consumerExampleAbi,
-    account: address,
-  } as const;
+  const commitReveal2Address = useMemo(
+    () => contracts.commitReveal2 as `0x${string}`,
+    [contracts.commitReveal2]
+  );
+  const consumerExampleAddress = useMemo(
+    () => contracts.consumerExample as `0x${string}`,
+    [contracts.consumerExample]
+  );
 
   const result = useReadContracts({
     contracts: [
       {
-        ...consumerExampleContract,
+        address: consumerExampleAddress,
+        abi: consumerExampleAbi,
         functionName: "s_blockNumbers",
         args: [requestId],
       },
       {
-        ...commitReveal2Contract,
+        address: commitReveal2Address,
+        abi: commitReveal2Abi,
         functionName: "s_currentRound",
       },
       {
-        ...commitReveal2Contract,
+        address: commitReveal2Address,
+        abi: commitReveal2Abi,
         functionName: "s_requestInfo",
         args: [requestId],
       },
       {
-        ...consumerExampleContract,
+        address: consumerExampleAddress,
+        abi: consumerExampleAbi,
         functionName: "s_requests",
         args: [requestId],
       },
@@ -63,57 +65,109 @@ export default function RequestDetailClient({
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  const refetchData = useCallback(() => {
+    result.refetch();
+    setRefreshCounter((prev) => prev + 1);
+  }, [result]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      result.refetch();
+      refetchData();
     }, 12000); // every 12 seconds
 
     return () => clearInterval(interval);
-  }, [result]);
+  }, [refetchData]);
 
-  const startTime = (result.data?.[2]?.result as [bigint, bigint])?.[1];
+  const startTime = useMemo(
+    () => (result.data?.[2]?.result as [bigint, bigint])?.[1],
+    [result.data]
+  );
 
   const config = useConfig();
   type BlockWithTxs = GetBlockReturnType<true>;
   const [block, setBlock] = useState<BlockWithTxs | null>(null);
 
-  const merkleRoot = useMerkleRoot(startTime, result.dataUpdatedAt);
+  const merkleRoot = useMerkleRoot(startTime, refreshCounter);
 
-  const resultArray = result.data?.[0]?.result as bigint[] | undefined;
-  const requestBlockNumber = resultArray?.[0];
+  const resultArray = useMemo(
+    () => result.data?.[0]?.result as bigint[] | undefined,
+    [result.data]
+  );
+
+  const requestBlockNumber = useMemo(() => resultArray?.[0], [resultArray]);
 
   useEffect(() => {
-    if (!requestBlockNumber) return;
+    if (!requestBlockNumber || block?.number === requestBlockNumber) return;
+
+    let isMounted = true;
     getBlock(config, {
       blockNumber: requestBlockNumber,
       includeTransactions: true,
-    }).then(setBlock);
+    }).then((blockData) => {
+      if (isMounted) {
+        setBlock(blockData);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [requestBlockNumber, config]);
 
-  const generateBlockNumber = resultArray?.[2];
+  const generateBlockNumber = useMemo(() => resultArray?.[2], [resultArray]);
+
   const [generateBlock, setGenerateBlock] = useState<BlockWithTxs | null>(null);
 
   useEffect(() => {
-    if (!generateBlockNumber || generateBlockNumber === BigInt(0)) return;
+    if (
+      !generateBlockNumber ||
+      generateBlockNumber === BigInt(0) ||
+      generateBlock?.number === generateBlockNumber
+    )
+      return;
+
+    let isMounted = true;
     getBlock(config, {
       blockNumber: generateBlockNumber,
       includeTransactions: true,
-    }).then(setGenerateBlock);
+    }).then((blockData) => {
+      if (isMounted) {
+        setGenerateBlock(blockData);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [generateBlockNumber, config]);
 
-  const generateTime = generateBlock
-    ? new Date(Number(generateBlock.timestamp) * 1000).toLocaleString()
-    : undefined;
+  const generateTime = useMemo(
+    () =>
+      generateBlock
+        ? new Date(Number(generateBlock.timestamp) * 1000).toLocaleString()
+        : undefined,
+    [generateBlock]
+  );
 
-  const generateTx = generateBlock?.transactions.find(
-    (tx) => tx.to?.toLowerCase() === contracts.commitReveal2.toLowerCase()
+  const generateTx = useMemo(
+    () =>
+      generateBlock?.transactions.find(
+        (tx) => tx.to?.toLowerCase() === commitReveal2Address.toLowerCase()
+      ),
+    [generateBlock, commitReveal2Address]
   );
 
   const decodedInput = useDecodedInput(generateTx?.input);
 
   const revealRows = useDecodedRevealOrder(decodedInput);
-  const currentRound = result.data?.[1]?.result as bigint | undefined;
+
+  const currentRound = useMemo(
+    () => result.data?.[1]?.result as bigint | undefined,
+    [result.data]
+  );
+
   const participants = useParticipants(
     requestId,
     currentRound,
@@ -124,12 +178,13 @@ export default function RequestDetailClient({
   const { requestFee, requestTime, requestTxHash } = useRequestMetadata(
     resultArray,
     block,
-    contracts.consumerExample
+    consumerExampleAddress
   );
 
-  const randomNumberTuple = result.data?.[3]?.result as
-    | [boolean, bigint]
-    | undefined;
+  const randomNumberTuple = useMemo(
+    () => result.data?.[3]?.result as [boolean, bigint] | undefined,
+    [result.data]
+  );
 
   const isGenerated = randomNumberTuple?.[0];
   const randomNumber = randomNumberTuple?.[1];
@@ -141,6 +196,7 @@ export default function RequestDetailClient({
           <button
             onClick={() => {
               setIsSpinning(true);
+              setRefreshCounter((prev) => prev + 1);
               result.refetch().finally(() => {
                 setTimeout(() => setIsSpinning(false), 500);
               });
@@ -164,13 +220,17 @@ export default function RequestDetailClient({
             <EmptyStateMessage />
           ) : (
             <>
-              <ParticipatingNodes participants={participants} />
+              <ParticipatingNodes
+                participants={participants}
+                chainId={chainId}
+              />
 
               <div className="space-y-6">
                 <RequestInfoSection
                   requestFee={requestFee}
                   requestTime={requestTime}
                   requestTxHash={requestTxHash}
+                  chainId={chainId}
                 />
 
                 <RandomNumberSection
@@ -180,6 +240,7 @@ export default function RequestDetailClient({
                   randomNumber={randomNumber}
                   generateTime={generateTime}
                   generateTxHash={generateTx?.hash}
+                  chainId={chainId}
                 />
               </div>
             </>
