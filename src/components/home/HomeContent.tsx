@@ -5,10 +5,14 @@ import {
   commitReveal2Abi,
   consumerExampleAbi,
 } from "@/constants";
-import { useMemo, useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
-import { useAccount, useChainId, useReadContracts } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useReadContract,
+  useReadContracts,
+} from "wagmi";
 import ActivatedNodeList from "./ActivatedNodeList";
 import EmptyState from "./EmptyState";
 import RequestHeader from "./RequestHeader";
@@ -29,6 +33,7 @@ export default function HomeContent() {
     abi: commitReveal2Abi,
     account: address,
   } as const;
+
   const consumerExampleContract = {
     address: contracts.consumerExample as `0x${string}`,
     abi: consumerExampleAbi,
@@ -44,16 +49,17 @@ export default function HomeContent() {
         ...commitReveal2Contract,
         functionName: "owner",
       },
-      {
-        ...consumerExampleContract,
-        functionName: "getYourRequests",
-      },
     ],
+  });
+  const requestsInfo = useReadContract({
+    ...consumerExampleContract,
+    functionName: "getYourRequests",
   });
 
   useEffect(() => {
     const interval = setInterval(() => {
       result.refetch();
+      requestsInfo.refetch();
     }, 12000); // 12 seconds
 
     return () => clearInterval(interval);
@@ -68,16 +74,13 @@ export default function HomeContent() {
       ? (result.data?.[1]?.result as `0x${string}` | undefined)
       : undefined;
   const rawRequests =
-    result.status === "success"
-      ? (result.data?.[2]?.result as any[] | undefined)
+    requestsInfo.status === "success"
+      ? (requestsInfo.data as any[] | undefined)
       : undefined;
-
-  console.log(rawRequests);
 
   const requests = useMemo<Request[]>(() => {
     if (!rawRequests) return [];
     const [requestIds, isFulfilled, randomNumbers] = rawRequests;
-    console.log(requestIds, isFulfilled, randomNumbers);
     return requestIds.map((id: bigint, i: number) => ({
       id: id.toString(),
       status: isFulfilled[i] ? "Fulfilled" : "Pending",
@@ -110,7 +113,7 @@ export default function HomeContent() {
                 result.refetch().finally(() => {
                   setTimeout(() => setIsSpinning(false), 500);
                 });
-                console.log(result.data);
+                requestsInfo.refetch();
               }}
               className="text-blue-600 hover:text-blue-800 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
             >
@@ -127,11 +130,13 @@ export default function HomeContent() {
             commitReveal2Address={contracts.commitReveal2 as `0x${string}`}
             consumerExampleAddress={contracts.consumerExample as `0x${string}`}
             requestDisabled={requestDisabled}
+            chainId={chainId}
             onRefresh={() => {
               setIsSpinning(true);
               result.refetch().finally(() => {
                 setTimeout(() => setIsSpinning(false), 500);
               });
+              requestsInfo.refetch();
             }}
           />
           <RequestTable
@@ -144,6 +149,7 @@ export default function HomeContent() {
             nodes={activatedNodeList}
             leaderAddress={leaderAddress}
             commitReveal2Address={contracts.commitReveal2 as `0x${string}`}
+            chainId={chainId}
           />
         </div>
       )}

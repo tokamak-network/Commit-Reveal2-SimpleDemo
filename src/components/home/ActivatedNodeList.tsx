@@ -3,19 +3,24 @@
 import { useState } from "react";
 import { LuExternalLink } from "react-icons/lu";
 import type { ActivatedNode } from "./types";
+import { getExplorerUrl } from "@/constants";
 
 interface Props {
   nodes: ActivatedNode[];
   leaderAddress: `0x${string}` | undefined;
   commitReveal2Address: string;
+  chainId: number;
 }
 
 export default function ActivatedNodeList({
   nodes,
   leaderAddress,
   commitReveal2Address,
+  chainId,
 }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
+
+  const leaderUrl = getExplorerUrl(chainId, `address/${leaderAddress}`);
 
   return (
     <div className="w-full max-w-6xl backdrop-blur-sm bg-white/60 rounded-xl p-6 shadow mt-12">
@@ -26,7 +31,10 @@ export default function ActivatedNodeList({
         <div className="text-left">
           <span className="font-semibold">CommitReveal2 Contract:</span>{" "}
           <a
-            href={`https://etherscan.io/address/${commitReveal2Address}`}
+            href={getExplorerUrl(chainId, `address/${commitReveal2Address}`)}
+            onClick={(e) => {
+              if (getExplorerUrl(chainId) === "#") e.preventDefault();
+            }}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-blue-700 hover:underline break-all"
@@ -38,7 +46,10 @@ export default function ActivatedNodeList({
         <div className="text-left border-b border-gray-300 pb-2 mb-2">
           <span className="font-semibold">Leader Node:</span>{" "}
           <a
-            href={`https://etherscan.io/address/${leaderAddress}`}
+            href={leaderUrl}
+            onClick={(e) => {
+              if (leaderUrl === "#") e.preventDefault();
+            }}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-blue-700 hover:underline break-all"
@@ -67,27 +78,33 @@ export default function ActivatedNodeList({
               </td>
             </tr>
           ) : (
-            nodes.slice(0, visibleCount).map((node) => (
-              <tr
-                key={node.index}
-                className="border-b border-gray-200 hover:bg-gray-50"
-              >
-                <td className="px-4 py-2 font-medium text-sm text-gray-700">
-                  {node.index}
-                </td>
-                <td className="px-4 py-2 font-mono text-sm font-medium text-gray-800 break-all">
-                  <a
-                    href={`https://etherscan.io/address/${node.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-blue-700 hover:underline break-all"
-                  >
-                    {node.address}
-                    <LuExternalLink size={12} />
-                  </a>
-                </td>
-              </tr>
-            ))
+            nodes.slice(0, visibleCount).map((node) => {
+              const explorerUrl = getExplorerUrl(chainId, `address/${node.address}`);
+              return (
+                <tr
+                  key={node.index}
+                  className="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <td className="px-4 py-2 font-medium text-sm text-gray-700">
+                    {node.index}
+                  </td>
+                  <td className="px-4 py-2 font-mono text-sm font-medium text-gray-800 break-all">
+                    <a
+                      href={explorerUrl}
+                      onClick={(e) => {
+                        if (explorerUrl === "#") e.preventDefault();
+                      }}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-blue-700 hover:underline break-all"
+                    >
+                      {node.address}
+                      <LuExternalLink size={12} />
+                    </a>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

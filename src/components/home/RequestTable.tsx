@@ -18,7 +18,6 @@ export default function RequestTable({
   itemsPerPage,
   onPageChange,
 }: Props) {
-  console.log(requests);
   const sortedRequests = [...requests].sort(
     (a, b) => Number(b.id) - Number(a.id)
   );

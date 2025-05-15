@@ -10,7 +10,23 @@ export const chainsToContracts: ContractsConfig = {
     consumerExample: "0x10Aeafac83d48E2f9ac4bAAf94311c45fACe1404",
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
+  11155111: {
+    consumerExample: "0xf0e258D698F8B317cDba046096f38Cd7aDe5Fe3c",
+    commitReveal2: "0xA388e2fc1f7FC53FF79560BBA3eD32Fc85472990",
+  },
 };
+
+export const chainIdToExplorerUrl: { [chainId: number]: string | null } = {
+  11155111: "https://sepolia.etherscan.io",
+  111551119090: "https://explorer.thanos-sepolia.tokamak.network",
+  31337: null,
+};
+
+export function getExplorerUrl(chainId: number, path?: string): string {
+  const base = chainIdToExplorerUrl[chainId];
+  if (!base) return "#";
+  return path ? `${base}/${path}` : base;
+}
 
 export const consumerExampleAbi = [
   {
