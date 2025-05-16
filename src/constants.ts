@@ -11,7 +11,7 @@ export const chainsToContracts: ContractsConfig = {
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {
-    consumerExample: "0x451720f4Be478c61d7aC33E172b0E30c5De136ed",
+    consumerExample: "0xd74C57De9BC0FD0d80C9c824899bc032b0EC3ef3",
     commitReveal2: "0xD9B1a880824829BF420025Ee5D78F400270861B8",
   },
 };
@@ -101,7 +101,7 @@ export const consumerExampleAbi = [
   },
   {
     type: "function",
-    name: "s_blockNumbers",
+    name: "s_requestInfos",
     inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
     outputs: [
       {
@@ -109,6 +109,7 @@ export const consumerExampleAbi = [
         type: "uint256",
         internalType: "uint256",
       },
+      { name: "requester", type: "address", internalType: "address" },
       { name: "requestFee", type: "uint256", internalType: "uint256" },
       {
         name: "fulfillBlockNumber",
@@ -138,6 +139,15 @@ export const consumerExampleAbi = [
     ],
     stateMutability: "view",
   },
+  {
+    type: "function",
+    name: "withdraw",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  { type: "error", name: "ETHTransferFailed", inputs: [] },
+  { type: "error", name: "InsufficientBalance", inputs: [] },
   {
     type: "error",
     name: "OnlyCoordinatorCanFulfill",

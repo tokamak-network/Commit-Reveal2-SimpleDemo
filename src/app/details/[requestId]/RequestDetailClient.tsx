@@ -41,7 +41,7 @@ export default function RequestDetailClient({
       {
         address: consumerExampleAddress,
         abi: consumerExampleAbi,
-        functionName: "s_blockNumbers",
+        functionName: "s_requestInfos",
         args: [requestId],
       },
       {
@@ -116,7 +116,7 @@ export default function RequestDetailClient({
     };
   }, [requestBlockNumber, config]);
 
-  const generateBlockNumber = useMemo(() => resultArray?.[2], [resultArray]);
+  const generateBlockNumber = useMemo(() => resultArray?.[3], [resultArray]);
 
   const [generateBlock, setGenerateBlock] = useState<BlockWithTxs | null>(null);
 
