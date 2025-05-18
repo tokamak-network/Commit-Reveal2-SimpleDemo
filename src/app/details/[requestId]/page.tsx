@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import RequestDetailClient from "./RequestDetailClient";
+import RequestDetailClient from "../../../components/details/RequestDetailClient";
 
 export default function Page({
   params,

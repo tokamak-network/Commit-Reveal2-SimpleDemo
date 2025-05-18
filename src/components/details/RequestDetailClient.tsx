@@ -8,23 +8,21 @@ import {
 import { getBlock, type GetBlockReturnType } from "@wagmi/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
-import { useAccount, useChainId, useConfig, useReadContracts } from "wagmi";
-import EmptyStateMessage from "./components/EmptyStateMessage";
-import ParticipatingNodes from "./components/ParticipatingNodes";
-import RandomNumberSection from "./components/RandomNumberSection";
-import RequestInfoSection from "./components/RequestInfoSection";
-import { useDecodedInput } from "./hooks/useDecodedInput";
-import { useDecodedRevealOrder } from "./hooks/useDecodedRevealOrder";
-import { useMerkleRoot } from "./hooks/useMerkleRoot";
-import { useParticipants } from "./hooks/useParticipants";
-import { useRequestMetadata } from "./hooks/useRequestMetadata";
+import { useChainId, useConfig, useReadContracts } from "wagmi";
+import { useDecodedInput } from "../../hooks/useDecodedInput";
+import { useDecodedRevealOrder } from "../../hooks/useDecodedRevealOrder";
+import { useMerkleRoot } from "../../hooks/useMerkleRoot";
+import { useParticipants } from "../../hooks/useParticipants";
+import DetailEmptyState from "./DetailEmptyState";
+import ParticipatingNodes from "./ParticipatingNodes";
+import RandomNumberSection from "./RandomNumberSection";
+import RequestInfoSection from "./RequestInfoSection";
 
 export default function RequestDetailClient({
   requestId,
 }: {
   requestId: string;
 }) {
-  const { isConnected, address } = useAccount();
   const chainId = useChainId();
   const contracts = useMemo(() => chainsToContracts[chainId], [chainId]);
   const commitReveal2Address = useMemo(
@@ -41,7 +39,7 @@ export default function RequestDetailClient({
       {
         address: consumerExampleAddress,
         abi: consumerExampleAbi,
-        functionName: "s_requestInfos",
+        functionName: "getDetailInfo",
         args: [requestId],
       },
       {
@@ -53,12 +51,6 @@ export default function RequestDetailClient({
         address: commitReveal2Address,
         abi: commitReveal2Abi,
         functionName: "s_requestInfo",
-        args: [requestId],
-      },
-      {
-        address: consumerExampleAddress,
-        abi: consumerExampleAbi,
-        functionName: "s_requests",
         args: [requestId],
       },
     ],
@@ -91,12 +83,38 @@ export default function RequestDetailClient({
 
   const merkleRoot = useMerkleRoot(startTime, refreshCounter);
 
-  const resultArray = useMemo(
-    () => result.data?.[0]?.result as bigint[] | undefined,
-    [result.data]
-  );
+  // getDetailInfo 결과 분석
+  const detailInfo = useMemo(() => {
+    if (!result.data?.[0]?.result) return null;
 
-  const requestBlockNumber = useMemo(() => resultArray?.[0], [resultArray]);
+    const [
+      requester,
+      requestFee,
+      requestBlockNumber,
+      fulfillBlockNumber,
+      randomNumber,
+    ] = result.data[0].result as [
+      `0x${string}`,
+      bigint,
+      bigint,
+      bigint,
+      bigint
+    ];
+
+    return {
+      requester,
+      requestFee,
+      requestBlockNumber,
+      fulfillBlockNumber,
+      randomNumber,
+      isGenerated: fulfillBlockNumber > BigInt(0),
+    };
+  }, [result.data]);
+
+  const requestBlockNumber = useMemo(
+    () => detailInfo?.requestBlockNumber,
+    [detailInfo]
+  );
 
   useEffect(() => {
     if (!requestBlockNumber || block?.number === requestBlockNumber) return;
@@ -116,7 +134,10 @@ export default function RequestDetailClient({
     };
   }, [requestBlockNumber, config]);
 
-  const generateBlockNumber = useMemo(() => resultArray?.[3], [resultArray]);
+  const generateBlockNumber = useMemo(
+    () => (detailInfo?.isGenerated ? detailInfo.fulfillBlockNumber : undefined),
+    [detailInfo]
+  );
 
   const [generateBlock, setGenerateBlock] = useState<BlockWithTxs | null>(null);
 
@@ -175,19 +196,27 @@ export default function RequestDetailClient({
     startTime
   );
 
-  const { requestFee, requestTime, requestTxHash } = useRequestMetadata(
-    resultArray,
-    block,
-    consumerExampleAddress
-  );
+  // 요청 메타데이터
+  const requestMetadata = useMemo(() => {
+    if (!block || !detailInfo)
+      return { requestTime: undefined, requestTxHash: undefined };
 
-  const randomNumberTuple = useMemo(
-    () => result.data?.[3]?.result as [boolean, bigint] | undefined,
-    [result.data]
-  );
+    const requestTime = new Date(
+      Number(block.timestamp) * 1000
+    ).toLocaleString();
 
-  const isGenerated = randomNumberTuple?.[0];
-  const randomNumber = randomNumberTuple?.[1];
+    // 트랜잭션 필터링 - detailInfo의 requester 기반으로 필터링
+    const requestTxHash = block.transactions.find(
+      (tx) =>
+        tx.to?.toLowerCase() === consumerExampleAddress.toLowerCase() &&
+        tx.from.toLowerCase() === detailInfo.requester.toLowerCase()
+    )?.hash;
+
+    return {
+      requestTime,
+      requestTxHash,
+    };
+  }, [block, detailInfo, consumerExampleAddress]);
 
   return (
     <div className="flex flex-col min-h-[80vh] px-6 w-full items-start">
@@ -216,8 +245,10 @@ export default function RequestDetailClient({
           <h2 className="font-semibold text-lg text-gray-800 mb-2">
             Request ID: <span className="font-mono break-all">{requestId}</span>
           </h2>
-          {!block || requestBlockNumber === BigInt(0) ? (
-            <EmptyStateMessage />
+          {!block ||
+          !detailInfo ||
+          detailInfo.requestBlockNumber === BigInt(0) ? (
+            <DetailEmptyState />
           ) : (
             <>
               <ParticipatingNodes
@@ -227,17 +258,18 @@ export default function RequestDetailClient({
 
               <div className="space-y-6">
                 <RequestInfoSection
-                  requestFee={requestFee}
-                  requestTime={requestTime}
-                  requestTxHash={requestTxHash}
+                  requester={detailInfo.requester}
+                  requestFee={detailInfo.requestFee}
+                  requestTime={requestMetadata.requestTime}
+                  requestTxHash={requestMetadata.requestTxHash}
                   chainId={chainId}
                 />
 
                 <RandomNumberSection
                   merkleRoot={merkleRoot}
-                  isGenerated={isGenerated}
+                  isGenerated={detailInfo.isGenerated}
                   revealRows={revealRows}
-                  randomNumber={randomNumber}
+                  randomNumber={detailInfo.randomNumber}
                   generateTime={generateTime}
                   generateTxHash={generateTx?.hash}
                   chainId={chainId}

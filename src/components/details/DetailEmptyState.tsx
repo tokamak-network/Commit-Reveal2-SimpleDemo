@@ -1,6 +1,6 @@
 "use client";
 
-export default function EmptyStateMessage() {
+export default function DetailEmptyState() {
   return (
     <div className="flex items-start justify-start mt-4">
       <p className="text-gray-500 italic">
