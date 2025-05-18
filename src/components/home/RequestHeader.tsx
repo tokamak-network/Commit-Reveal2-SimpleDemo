@@ -6,11 +6,12 @@ import {
   getExplorerUrl,
 } from "@/constants";
 import { estimateFeesPerGas, estimateGas, readContract } from "@wagmi/core";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { IoMdClose } from "react-icons/io";
 import { LuExternalLink } from "react-icons/lu";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, parseGwei } from "viem";
 import { useConfig } from "wagmi";
 import RequestModal from "./RequestModal";
 
@@ -61,13 +62,35 @@ export default function RequestHeader({
     }
   }, [errorMessage]);
 
-  // Update fee data every 6 seconds while modal is open
+  // Function to get gas price from Infura API
+  const getInfuraGasPrice = async (): Promise<bigint> => {
+    try {
+      const { data } = await axios.get(
+        `https://gas.api.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_API_KEY}/networks/${chainId}/suggestedGasFees`
+      );
+
+      // Convert maxFeePerGas from gwei to wei
+      if (data && data.medium.suggestedMaxFeePerGas) {
+        return parseGwei(data.medium.suggestedMaxFeePerGas);
+      }
+
+      // Fallback to wagmi's estimateFeesPerGas if Infura API fails or returns unexpected format
+      console.log("Falling back to estimateFeesPerGas");
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    } catch (error) {
+      console.error("Error fetching gas price from Infura:", error);
+      // Fallback to wagmi's estimateFeesPerGas
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    }
+  };
+
+  // Update fee data every 11 seconds while modal is open
   useEffect(() => {
     if (!showModal || !callbackGasLimit) return;
 
     const updateFees = async () => {
       try {
-        const gasPrice = (await estimateFeesPerGas(config)).maxFeePerGas;
+        const gasPrice = await getInfuraGasPrice();
 
         const requestFee = await readContract(config, {
           abi: commitReveal2Abi,
@@ -94,9 +117,9 @@ export default function RequestHeader({
       }
     };
 
-    // Update immediately and then every 6 seconds
+    // Update immediately and then every 11 seconds
     updateFees();
-    const intervalId = setInterval(updateFees, 6000);
+    const intervalId = setInterval(updateFees, 11000);
 
     return () => clearInterval(intervalId);
   }, [
@@ -105,6 +128,7 @@ export default function RequestHeader({
     commitReveal2Address,
     consumerExampleAddress,
     config,
+    chainId,
   ]);
 
   async function handleClick() {
@@ -113,7 +137,7 @@ export default function RequestHeader({
     setShowNotification(false);
 
     try {
-      const requestFee = await getRequestFee(
+      const { requestFee, gasPrice } = await getRequestFee(
         commitReveal2Address,
         consumerExampleAddress
       );
@@ -130,8 +154,7 @@ export default function RequestHeader({
           value: requestFee,
         });
 
-        const networkFee =
-          estimatedGasUsed * (await estimateFeesPerGas(config)).maxFeePerGas;
+        const networkFee = estimatedGasUsed * gasPrice;
         const totalFee = requestFee + networkFee;
 
         setFeeData({ requestFee, networkFee, totalFee });
@@ -166,7 +189,7 @@ export default function RequestHeader({
   async function getRequestFee(
     commitReveal2Address: `0x${string}`,
     consumerExampleAddress: `0x${string}`
-  ): Promise<bigint> {
+  ): Promise<{ requestFee: bigint; gasPrice: bigint }> {
     const callbackGasLimit = await readContract(config, {
       abi: consumerExampleAbi,
       address: consumerExampleAddress,
@@ -174,7 +197,7 @@ export default function RequestHeader({
     });
     setCallbackGasLimit(callbackGasLimit as bigint);
 
-    const gasPrice = (await estimateFeesPerGas(config)).maxFeePerGas;
+    const gasPrice = await getInfuraGasPrice();
 
     const requestFee = await readContract(config, {
       abi: commitReveal2Abi,
@@ -182,7 +205,7 @@ export default function RequestHeader({
       functionName: "estimateRequestPrice",
       args: [callbackGasLimit, gasPrice],
     });
-    return requestFee as bigint;
+    return { requestFee: requestFee as bigint, gasPrice };
   }
 
   return (
