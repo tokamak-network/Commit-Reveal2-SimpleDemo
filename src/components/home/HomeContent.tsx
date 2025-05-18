@@ -14,7 +14,7 @@ import {
   useReadContracts,
 } from "wagmi";
 import ActivatedNodeList from "./ActivatedNodeList";
-import EmptyState from "./EmptyState";
+import HomeEmptyState from "./HomeEmptyState";
 import RequestHeader from "./RequestHeader";
 import RequestTable from "./RequestTable";
 import type { Request } from "./types";
@@ -53,7 +53,7 @@ export default function HomeContent() {
   });
   const requestsInfo = useReadContract({
     ...consumerExampleContract,
-    functionName: "getYourRequests",
+    functionName: "getMainInfos",
   });
 
   useEffect(() => {
@@ -80,12 +80,27 @@ export default function HomeContent() {
 
   const requests = useMemo<Request[]>(() => {
     if (!rawRequests) return [];
-    const [requestIds, isFulfilled, randomNumbers] = rawRequests;
-    return requestIds.map((id: bigint, i: number) => ({
-      id: id.toString(),
-      status: isFulfilled[i] ? "Fulfilled" : "Pending",
-      randomNumber: randomNumbers[i].toString(),
-    }));
+
+    const [requestCount, mainInfos] = rawRequests;
+    const count = Number(requestCount) > 100 ? 100 : Number(requestCount);
+
+    const result: Request[] = [];
+    for (let i = 0; i < count; i++) {
+      const info = mainInfos[i];
+      if (!info) continue;
+
+      const { requestId, requester, fulfillBlockNumber, randomNumber } = info;
+
+      result.push({
+        id: requestId.toString(),
+        requester: requester as string,
+        status: fulfillBlockNumber > BigInt(0) ? "Fulfilled" : "Pending",
+        randomNumber: randomNumber.toString(),
+      });
+    }
+
+    // 최신 요청이 먼저 표시되도록 역순 정렬
+    return result.reverse();
   }, [rawRequests]);
 
   const activatedNodeList = useMemo(() => {
@@ -101,9 +116,9 @@ export default function HomeContent() {
   return (
     <main>
       {!isConnected ? (
-        <EmptyState message="Please connect a wallet..." />
+        <HomeEmptyState message="Please connect a wallet..." />
       ) : !isSupportedNetwork ? (
-        <EmptyState message="Please connect to an Anvil network (or a supported testnet)." />
+        <HomeEmptyState message="Please connect to an Anvil network (or a supported testnet)." />
       ) : (
         <div className="mt-12">
           <div className="flex justify-end mb-4">
@@ -126,7 +141,6 @@ export default function HomeContent() {
           </div>
           <RequestHeader
             requestsCount={requests.length}
-            onRequest={() => console.log("Random number request triggered")}
             commitReveal2Address={contracts.commitReveal2 as `0x${string}`}
             consumerExampleAddress={contracts.consumerExample as `0x${string}`}
             requestDisabled={requestDisabled}
