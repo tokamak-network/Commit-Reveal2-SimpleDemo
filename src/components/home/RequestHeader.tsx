@@ -16,7 +16,6 @@ import RequestModal from "./RequestModal";
 
 interface Props {
   requestsCount: number;
-  onRequest: () => void;
   commitReveal2Address: `0x${string}`;
   consumerExampleAddress: `0x${string}`;
   requestDisabled?: boolean;
@@ -26,7 +25,6 @@ interface Props {
 
 export default function RequestHeader({
   requestsCount,
-  onRequest,
   commitReveal2Address,
   consumerExampleAddress,
   requestDisabled,
@@ -70,6 +68,7 @@ export default function RequestHeader({
     const updateFees = async () => {
       try {
         const gasPrice = (await estimateFeesPerGas(config)).maxFeePerGas;
+
         const requestFee = await readContract(config, {
           abi: commitReveal2Abi,
           address: commitReveal2Address,
@@ -86,6 +85,7 @@ export default function RequestHeader({
           to: consumerExampleAddress,
           value: requestFee as bigint,
         });
+        console.log("gasPrice", gasPrice);
         const networkFee = estimatedGasUsed * gasPrice;
         const totalFee = (requestFee as bigint) + networkFee;
 
@@ -176,6 +176,7 @@ export default function RequestHeader({
     setCallbackGasLimit(callbackGasLimit as bigint);
 
     const gasPrice = (await estimateFeesPerGas(config)).maxFeePerGas;
+
     const requestFee = await readContract(config, {
       abi: commitReveal2Abi,
       address: commitReveal2Address,

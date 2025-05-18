@@ -11,7 +11,7 @@ export const chainsToContracts: ContractsConfig = {
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {
-    consumerExample: "0xd74C57De9BC0FD0d80C9c824899bc032b0EC3ef3",
+    consumerExample: "0x4115cFbC8589B68A87F7d5e6Bf3C9c8cBFFEA9a6",
     commitReveal2: "0xD9B1a880824829BF420025Ee5D78F400270861B8",
   },
 };
@@ -51,28 +51,63 @@ export const consumerExampleAbi = [
   },
   {
     type: "function",
-    name: "getYourRequests",
-    inputs: [],
+    name: "getDetailInfo",
+    inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
     outputs: [
+      { name: "requester", type: "address", internalType: "address" },
+      { name: "requestFee", type: "uint256", internalType: "uint256" },
       {
-        name: "requestIds",
-        type: "uint256[]",
-        internalType: "uint256[]",
+        name: "requestBlockNumber",
+        type: "uint256",
+        internalType: "uint256",
       },
-      { name: "isFulFilled", type: "bool[]", internalType: "bool[]" },
       {
-        name: "randomNumbers",
-        type: "uint256[]",
-        internalType: "uint256[]",
+        name: "fulfillBlockNumber",
+        type: "uint256",
+        internalType: "uint256",
       },
+      { name: "randomNumber", type: "uint256", internalType: "uint256" },
     ],
     stateMutability: "view",
   },
   {
     type: "function",
-    name: "lastRequestId",
+    name: "getMainInfos",
     inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "requestCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "tuple[100]",
+        internalType: "struct ConsumerExampleV2.MainInfo[100]",
+        components: [
+          {
+            name: "requestId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "requester",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "fulfillBlockNumber",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "randomNumber",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -87,13 +122,6 @@ export const consumerExampleAbi = [
   },
   {
     type: "function",
-    name: "refund",
-    inputs: [{ name: "round", type: "uint256", internalType: "uint256" }],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
     name: "requestRandomNumber",
     inputs: [],
     outputs: [],
@@ -101,42 +129,46 @@ export const consumerExampleAbi = [
   },
   {
     type: "function",
-    name: "s_requestInfos",
-    inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
+    name: "s_detailInfos",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     outputs: [
       {
         name: "requestBlockNumber",
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "requester", type: "address", internalType: "address" },
       { name: "requestFee", type: "uint256", internalType: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "s_mainInfos",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "requestId", type: "uint256", internalType: "uint256" },
+      { name: "requester", type: "address", internalType: "address" },
       {
         name: "fulfillBlockNumber",
         type: "uint256",
         internalType: "uint256",
       },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "s_requesterRequestIds",
-    inputs: [
-      { name: "requester", type: "address", internalType: "address" },
-      { name: "", type: "uint256", internalType: "uint256" },
-    ],
-    outputs: [{ name: "requestIds", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "s_requests",
-    inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
-    outputs: [
-      { name: "fulfilled", type: "bool", internalType: "bool" },
       { name: "randomNumber", type: "uint256", internalType: "uint256" },
     ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "s_requestCount",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "s_requestIdToIndexPlusOne",
+    inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "index", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -146,7 +178,6 @@ export const consumerExampleAbi = [
     outputs: [],
     stateMutability: "nonpayable",
   },
-  { type: "error", name: "ETHTransferFailed", inputs: [] },
   { type: "error", name: "InsufficientBalance", inputs: [] },
   {
     type: "error",
