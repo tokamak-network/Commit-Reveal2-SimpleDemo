@@ -85,7 +85,6 @@ export default function RequestHeader({
           to: consumerExampleAddress,
           value: requestFee as bigint,
         });
-        console.log("gasPrice", gasPrice);
         const networkFee = estimatedGasUsed * gasPrice;
         const totalFee = (requestFee as bigint) + networkFee;
 
