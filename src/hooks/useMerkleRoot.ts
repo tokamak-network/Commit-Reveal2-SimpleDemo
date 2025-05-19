@@ -18,14 +18,19 @@ export function useMerkleRoot(
     if (!startTime || startTime === BigInt(0)) return;
 
     let isMounted = true;
+    let isLoading = false;
 
     const fetchMerkleRoot = async () => {
+      if (!isMounted || isLoading) return;
+
+      isLoading = true;
       try {
         const res = await readContract(config, {
           abi: commitReveal2Abi,
           address: contracts.commitReveal2 as `0x${string}`,
           functionName: "getMerkleRoot",
           args: [startTime],
+          blockTag: "latest",
         });
 
         if (isMounted) {
@@ -34,6 +39,8 @@ export function useMerkleRoot(
         }
       } catch (error) {
         console.error("Error fetching merkle root:", error);
+      } finally {
+        isLoading = false;
       }
     };
 
@@ -42,7 +49,7 @@ export function useMerkleRoot(
     return () => {
       isMounted = false;
     };
-  }, [startTime, config, contracts, refreshTrigger]); // refreshTrigger를 의존성 배열에 추가
+  }, [startTime, config, contracts, refreshTrigger]);
 
   return merkleRoot;
 }

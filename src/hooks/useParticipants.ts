@@ -2,8 +2,8 @@
 
 import { chainsToContracts, commitReveal2Abi } from "@/constants";
 import { readContract } from "@wagmi/core";
-import { recoverTypedDataAddress } from "viem";
 import { useEffect, useState } from "react";
+import { recoverTypedDataAddress } from "viem";
 import { useChainId, useConfig } from "wagmi";
 import { useDecodedInput } from "./useDecodedInput";
 
@@ -21,56 +21,81 @@ export function useParticipants(
   useEffect(() => {
     if (currentRound === undefined || !contracts?.commitReveal2) return;
 
+    let isMounted = true;
+    let isLoading = false;
+
     const resolve = async () => {
-      if (BigInt(requestId) === currentRound) {
-        const res = await readContract(config, {
-          abi: commitReveal2Abi,
-          address: contracts.commitReveal2 as `0x${string}`,
-          functionName: "getActivatedOperators",
-        });
-        setParticipants(res as `0x${string}`[]);
-      } else {
-        if (!input || !startTime) return;
+      if (isLoading || !isMounted) return;
 
-        const { vList, rsList, cvList } = input;
+      isLoading = true;
 
-        const domain = {
-          name: "Commit Reveal2",
-          version: "1",
-          chainId,
-          verifyingContract: contracts.commitReveal2 as `0x${string}`,
-        } as const;
+      try {
+        if (BigInt(requestId) === currentRound) {
+          const res = await readContract(config, {
+            abi: commitReveal2Abi,
+            address: contracts.commitReveal2 as `0x${string}`,
+            functionName: "getActivatedOperators",
+            blockTag: "latest",
+          });
+          if (isMounted) {
+            setParticipants(res as `0x${string}`[]);
+          }
+        } else {
+          if (!input || !startTime) {
+            isLoading = false;
+            return;
+          }
 
-        const types = {
-          Message: [
-            { name: "timestamp", type: "uint256" },
-            { name: "cv", type: "bytes32" },
-          ],
-        };
+          const { vList, rsList, cvList } = input;
 
-        const recoverList = await Promise.all(
-          cvList.map((cv, i) =>
-            recoverTypedDataAddress({
-              domain,
-              types,
-              primaryType: "Message",
-              message: {
-                timestamp: startTime,
-                cv,
-              },
-              signature: {
-                r: rsList[i].r,
-                s: rsList[i].s,
-                yParity: vList[i],
-              },
-            })
-          )
-        );
-        setParticipants(recoverList as `0x${string}`[]);
+          const domain = {
+            name: "Commit Reveal2",
+            version: "1",
+            chainId,
+            verifyingContract: contracts.commitReveal2 as `0x${string}`,
+          } as const;
+
+          const types = {
+            Message: [
+              { name: "timestamp", type: "uint256" },
+              { name: "cv", type: "bytes32" },
+            ],
+          };
+
+          const recoverList = await Promise.all(
+            cvList.map((cv, i) =>
+              recoverTypedDataAddress({
+                domain,
+                types,
+                primaryType: "Message",
+                message: {
+                  timestamp: startTime,
+                  cv,
+                },
+                signature: {
+                  r: rsList[i].r,
+                  s: rsList[i].s,
+                  yParity: vList[i],
+                },
+              })
+            )
+          );
+          if (isMounted) {
+            setParticipants(recoverList as `0x${string}`[]);
+          }
+        }
+      } catch (error) {
+        console.error("Error in useParticipants:", error);
+      } finally {
+        isLoading = false;
       }
     };
 
     resolve();
+
+    return () => {
+      isMounted = false;
+    };
   }, [currentRound, requestId, input, startTime, config, chainId, contracts]);
 
   return participants;
