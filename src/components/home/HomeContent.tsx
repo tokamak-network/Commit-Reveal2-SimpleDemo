@@ -50,20 +50,57 @@ export default function HomeContent() {
         functionName: "owner",
       },
     ],
+    query: {
+      enabled: true,
+      refetchInterval: 0, // Disable automatic polling
+      staleTime: 30000, // 30 seconds to maintain state
+      retry: 0, // No retries
+    },
   });
   const requestsInfo = useReadContract({
     ...consumerExampleContract,
     functionName: "getMainInfos",
+    query: {
+      enabled: true,
+      refetchInterval: 0, // Disable automatic polling
+      staleTime: 30000, // 30 seconds to maintain state
+      retry: 0, // No retries
+    },
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      result.refetch();
-      requestsInfo.refetch();
-    }, 12000); // 12 seconds
+  console.log("dd");
 
-    return () => clearInterval(interval);
-  }, [result]);
+  useEffect(() => {
+    let isMounted = true;
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const fetchData = () => {
+      if (isMounted) {
+        result.refetch().catch((error) => {
+          console.error("Error refetching data:", error);
+        });
+        requestsInfo.refetch().catch((error) => {
+          console.error("Error refetching request info:", error);
+        });
+      }
+    };
+
+    // Delay first execution by 15 seconds
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        fetchData();
+        // Then every 30 seconds
+        intervalId = setInterval(fetchData, 30000);
+      }
+    }, 15000);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
 
   const activatedOperators =
     result.status === "success"
@@ -99,9 +136,9 @@ export default function HomeContent() {
       });
     }
 
-    // 최신 요청이 먼저 표시되도록 역순 정렬
+    // Sort by most recent first
     return result.reverse();
-  }, [rawRequests]);
+  }, [rawRequests]); // Only depend on rawRequests, nothing else
 
   const activatedNodeList = useMemo(() => {
     if (!activatedOperators) return [];

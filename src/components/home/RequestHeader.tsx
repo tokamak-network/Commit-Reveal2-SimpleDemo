@@ -88,7 +88,10 @@ export default function RequestHeader({
   useEffect(() => {
     if (!showModal || !callbackGasLimit) return;
 
+    let isMounted = true;
     const updateFees = async () => {
+      if (!isMounted) return;
+
       try {
         const gasPrice = await getInfuraGasPrice();
 
@@ -111,7 +114,13 @@ export default function RequestHeader({
         const networkFee = estimatedGasUsed * gasPrice;
         const totalFee = (requestFee as bigint) + networkFee;
 
-        setFeeData({ requestFee: requestFee as bigint, networkFee, totalFee });
+        if (isMounted) {
+          setFeeData({
+            requestFee: requestFee as bigint,
+            networkFee,
+            totalFee,
+          });
+        }
       } catch (error) {
         console.error("Error updating fee data:", error);
       }
@@ -121,14 +130,17 @@ export default function RequestHeader({
     updateFees();
     const intervalId = setInterval(updateFees, 11000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [
     showModal,
     callbackGasLimit,
     commitReveal2Address,
     consumerExampleAddress,
     config,
-    chainId,
+    // Removed chainId from deps as it's already included in the config
   ]);
 
   async function handleClick() {
