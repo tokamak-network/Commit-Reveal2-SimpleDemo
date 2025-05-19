@@ -68,8 +68,6 @@ export default function HomeContent() {
     },
   });
 
-  console.log("dd");
-
   useEffect(() => {
     let isMounted = true;
     let intervalId: NodeJS.Timeout | null = null;
