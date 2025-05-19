@@ -6,7 +6,7 @@ import {
   consumerExampleAbi,
 } from "@/constants";
 import { getBlock, type GetBlockReturnType } from "@wagmi/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 import { useChainId, useConfig, useReadContracts } from "wagmi";
 import { useDecodedInput } from "../../hooks/useDecodedInput";
@@ -54,23 +54,45 @@ export default function RequestDetailClient({
         args: [requestId],
       },
     ],
+    query: {
+      enabled: true,
+      refetchInterval: 0,
+      staleTime: 30000,
+      retry: 0,
+    },
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
   const [refreshCounter, setRefreshCounter] = useState(0);
 
-  const refetchData = useCallback(() => {
-    result.refetch();
-    setRefreshCounter((prev) => prev + 1);
-  }, [result]);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      refetchData();
-    }, 12000); // every 12 seconds
+    let isMounted = true;
+    let intervalId: NodeJS.Timeout | null = null;
 
-    return () => clearInterval(interval);
-  }, [refetchData]);
+    const fetchData = () => {
+      if (isMounted) {
+        result.refetch().catch((error) => {
+          console.error("Error refetching in details page:", error);
+        });
+        setRefreshCounter((prev) => prev + 1);
+      }
+    };
+
+    // 30초 지연 후 첫 실행
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        fetchData();
+        // 그 후 60초마다 실행
+        intervalId = setInterval(fetchData, 60000);
+      }
+    }, 30000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
 
   const startTime = useMemo(
     () => (result.data?.[2]?.result as [bigint, bigint])?.[1],
