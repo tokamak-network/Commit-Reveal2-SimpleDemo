@@ -11,8 +11,8 @@ export const chainsToContracts: ContractsConfig = {
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {
-    consumerExample: "0x4115cFbC8589B68A87F7d5e6Bf3C9c8cBFFEA9a6",
-    commitReveal2: "0xD9B1a880824829BF420025Ee5D78F400270861B8",
+    consumerExample: "0xf853bFAc09D8635cc4EbaF5BEfC93d1B016CD449",
+    commitReveal2: "0xfCca8587CE5d51c6f5C546aAc6e4866751f7E074",
   },
 };
 
