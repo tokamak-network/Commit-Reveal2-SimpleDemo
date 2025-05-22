@@ -46,10 +46,14 @@ export default function RequestModal({
     confirmations: 0,
     hash,
     pollingInterval: 10000,
-    timeout: 200000,
+    timeout: 300000,
   });
 
   const formattedTotal = formatEther(currentTotalFee);
+
+  // Check if error is specifically a DRPC timeout error
+  const isDrpcTimeoutError =
+    isError && error?.message?.includes("Request timeout on the free tier");
 
   async function handleSendTransaction() {
     try {
@@ -140,12 +144,18 @@ export default function RequestModal({
             </div>
           </div>
         )}
-        {isError && error && (
+        {isError && error && !isDrpcTimeoutError && (
           <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
             Transaction failed: {error.message || "Unknown error"}
           </div>
         )}
-        {isConfirmed ? (
+        {isDrpcTimeoutError && (
+          <div className="text-sm text-yellow-600 bg-yellow-50 border border-yellow-200 rounded p-2">
+            RPC provider timeout. Your transaction may still be processing.
+            Please check the explorer.
+          </div>
+        )}
+        {isConfirmed || isDrpcTimeoutError ? (
           <button
             onClick={onClose}
             className="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm cursor-pointer"
