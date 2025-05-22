@@ -69,9 +69,13 @@ export default function RequestTable({
             <tr>
               <th className="w-1/12 px-4 py-2">Request ID</th>
               <th className="w-1/12 px-4 py-2">Status</th>
-              <th className="w-3/12 px-4 py-2">Requester</th>
-              <th className="w-5/12 px-4 py-2">Random Number</th>
-              <th className="w-2/12 px-4 py-2 text-right"> </th>
+              <th style={{ width: "11%" }} className="px-4 py-2">
+                Requester
+              </th>
+              <th style={{ width: "64%" }} className="px-4 py-2">
+                Random Number
+              </th>
+              <th className="w-1/12 px-4 py-2 text-right"> </th>
             </tr>
           </thead>
           <tbody className="min-h-[200px]">
@@ -113,9 +117,13 @@ export default function RequestTable({
                   </td>
                   <td className="px-4 py-2 text-xs font-mono overflow-hidden overflow-ellipsis">
                     <div className="group relative">
-                      <span>
+                      <span className="hidden lg:inline">
                         {req.requester.substring(0, 6)}...
                         {req.requester.substring(req.requester.length - 4)}
+                      </span>
+                      <span className="inline lg:hidden">
+                        {req.requester.substring(0, 4)}...
+                        {req.requester.substring(req.requester.length - 3)}
                       </span>
                       <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
                         {req.requester}
@@ -124,14 +132,26 @@ export default function RequestTable({
                     </div>
                   </td>
                   <td className="px-4 py-2 text-sm font-medium text-gray-800 break-normal font-mono tracking-normal overflow-hidden overflow-ellipsis">
-                    {req.status === "Fulfilled" ? req.randomNumber : ""}
+                    {req.status === "Fulfilled" ? (
+                      <div className="group relative">
+                        <span className="truncate block whitespace-nowrap overflow-hidden text-ellipsis">
+                          {req.randomNumber}
+                        </span>
+                        <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
+                          {req.randomNumber}
+                          <div className="absolute top-full left-5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </td>
                   <td className="px-4 py-2 text-right">
                     <Link
                       href={`/details/${req.id}`}
                       className="inline-flex justify-end px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-300 rounded hover:bg-blue-100 transition items-center gap-1"
                     >
-                      Details
+                      <span className="hidden sm:inline">Details</span>
                       <LuExternalLink size={14} />
                     </Link>
                   </td>
