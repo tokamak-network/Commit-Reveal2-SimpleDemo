@@ -43,8 +43,10 @@ export default function RequestModal({
     failureReason,
     error,
   } = useWaitForTransactionReceipt({
-    confirmations: 1,
+    confirmations: 0,
     hash,
+    pollingInterval: 10000,
+    timeout: 200000,
   });
 
   const formattedTotal = formatEther(currentTotalFee);
