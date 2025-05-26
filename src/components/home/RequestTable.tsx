@@ -36,138 +36,161 @@ export default function RequestTable({
   const currentRequests = sortedRequests.slice(indexOfFirst, indexOfLast);
 
   return (
-    <div className="w-full max-w-6xl backdrop-blur-sm bg-white/60 rounded-xl p-6 shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-700">
-            Request Information
-          </h2>
-          <div className="text-xs text-gray-500 italic">
-            {showOnlyMyRequests
-              ? "Showing only your requests from the most recent 100"
-              : "Showing the most recent 100 requests"}
+    <>
+      <style jsx>{`
+        @media (max-width: 930px) {
+          .hide-on-small {
+            display: none !important;
+          }
+        }
+        @media (min-width: 931px) {
+          .hide-on-small {
+            display: table-cell !important;
+          }
+        }
+      `}</style>
+      <div className="w-full max-w-6xl backdrop-blur-sm bg-white/60 rounded-xl p-6 shadow">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-700">
+              Request Information
+            </h2>
+            <div className="text-xs text-gray-500 italic">
+              {showOnlyMyRequests
+                ? "Showing only your requests from the most recent 100"
+                : "Showing the most recent 100 requests"}
+            </div>
+          </div>
+          <div className="relative inline-flex items-center">
+            <span className="mr-3 text-sm text-gray-700">
+              Show only my requests
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnlyMyRequests}
+                onChange={() => setShowOnlyMyRequests(!showOnlyMyRequests)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
           </div>
         </div>
-        <div className="relative inline-flex items-center">
-          <span className="mr-3 text-sm text-gray-700">
-            Show only my requests
-          </span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showOnlyMyRequests}
-              onChange={() => setShowOnlyMyRequests(!showOnlyMyRequests)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-      </div>
-      <div className="relative">
-        <table className="w-full table-fixed text-sm text-left text-gray-700">
-          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-            <tr>
-              <th className="w-1/12 px-4 py-2">Request ID</th>
-              <th className="w-1/12 px-4 py-2">Status</th>
-              <th style={{ width: "11%" }} className="px-4 py-2">
-                Requester
-              </th>
-              <th style={{ width: "64%" }} className="px-4 py-2">
-                Random Number
-              </th>
-              <th className="w-1/12 px-4 py-2 text-right"> </th>
-            </tr>
-          </thead>
-          <tbody className="min-h-[200px]">
-            {currentRequests.length === 0 ? (
+        <div className="relative">
+          <table className="w-full table-fixed text-sm text-left text-gray-700">
+            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
               <tr>
-                <td
-                  colSpan={5}
-                  className="text-center text-gray-500 py-6 w-full"
+                <th className="w-1/12 px-4 py-2">
+                  <span className="hidden md:block">Request</span> ID
+                </th>
+                <th className="w-1/12 px-4 py-2 hidden sm:table-cell">
+                  <div className="hidden md:block">Status</div>
+                </th>
+                <th
+                  className="px-4 py-2 hide-on-small"
+                  style={{ width: "11%" }}
                 >
-                  {showOnlyMyRequests
-                    ? "You haven't made any requests yet."
-                    : "No requests found."}
-                </td>
+                  Requester
+                </th>
+                <th className="pr-4 pl-7 py-2" style={{ width: "64%" }}>
+                  Random Number
+                </th>
+                <th className="px-4 py-2 text-right w-1/12 md:w-1/8  xl:w-1/12">
+                  {" "}
+                </th>
               </tr>
-            ) : (
-              currentRequests.map((req) => (
-                <tr
-                  key={req.id}
-                  className={`border-b border-gray-200 hover:bg-gray-50 ${
-                    address &&
-                    req.requester.toLowerCase() === address.toLowerCase()
-                      ? "bg-blue-50"
-                      : ""
-                  }`}
-                >
-                  <td className="px-4 py-2 text-sm font-medium text-gray-700">
-                    {req.id}
+            </thead>
+            <tbody className="min-h-[200px]">
+              {currentRequests.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center text-gray-500 py-6 w-full"
+                  >
+                    {showOnlyMyRequests
+                      ? "You haven't made any requests yet."
+                      : "No requests found."}
                   </td>
-                  <td className="px-4 py-2 text-sm">
-                    <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
-                        req.status === "Fulfilled"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2 text-xs font-mono overflow-hidden overflow-ellipsis">
-                    <div className="group relative">
-                      <span className="hidden lg:inline">
-                        {req.requester.substring(0, 6)}...
-                        {req.requester.substring(req.requester.length - 4)}
+                </tr>
+              ) : (
+                currentRequests.map((req) => (
+                  <tr
+                    key={req.id}
+                    className={`border-b border-gray-200 hover:bg-gray-50 ${
+                      address &&
+                      req.requester.toLowerCase() === address.toLowerCase()
+                        ? "bg-blue-50"
+                        : ""
+                    }`}
+                  >
+                    <td className="px-4 py-2 text-sm font-medium text-gray-700">
+                      {req.id}
+                    </td>
+                    <td className="px-2 py-2 text-sm hidden sm:table-cell">
+                      <span
+                        className={`text-xs font-medium px-2 py-1 rounded ${
+                          req.status === "Fulfilled"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {req.status}
                       </span>
-                      <span className="inline lg:hidden">
-                        {req.requester.substring(0, 4)}...
-                        {req.requester.substring(req.requester.length - 3)}
-                      </span>
-                      <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
-                        {req.requester}
-                        <div className="absolute top-full left-5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-800 break-normal font-mono tracking-normal overflow-hidden overflow-ellipsis">
-                    {req.status === "Fulfilled" ? (
+                    </td>
+                    <td className="px-4 py-2 text-xs font-mono overflow-hidden overflow-ellipsis hide-on-small">
                       <div className="group relative">
-                        <span className="truncate block whitespace-nowrap overflow-hidden text-ellipsis">
-                          {req.randomNumber}
+                        <span className="hidden xl:inline">
+                          {req.requester.substring(0, 6)}...
+                          {req.requester.substring(req.requester.length - 4)}
+                        </span>
+                        <span className="inline xl:hidden">
+                          {req.requester.substring(0, 4)}...
+                          {req.requester.substring(req.requester.length - 3)}
                         </span>
                         <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
-                          {req.randomNumber}
+                          {req.requester}
                           <div className="absolute top-full left-5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                         </div>
                       </div>
-                    ) : (
-                      ""
-                    )}
-                  </td>
-                  <td className="px-4 py-2 text-right">
-                    <Link
-                      href={`/details/${req.id}`}
-                      className="inline-flex justify-end px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-300 rounded hover:bg-blue-100 transition items-center gap-1"
-                    >
-                      <span className="hidden sm:inline">Details</span>
-                      <LuExternalLink size={14} />
-                    </Link>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="pr-4 pl-7 py-2 text-sm font-medium text-gray-800 break-normal font-mono tracking-normal overflow-hidden overflow-ellipsis">
+                      {req.status === "Fulfilled" ? (
+                        <div className="group relative">
+                          <span className="truncate block whitespace-nowrap overflow-hidden text-ellipsis">
+                            {req.randomNumber}
+                          </span>
+                          <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
+                            {req.randomNumber}
+                            <div className="absolute top-full left-5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </td>
+                    <td className="px-2 py-2 text-right">
+                      <Link
+                        href={`/details/${req.id}`}
+                        className="inline-flex justify-end px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-300 rounded hover:bg-blue-100 transition items-center gap-1"
+                      >
+                        <span className="hidden md:inline">Details</span>
+                        <LuExternalLink size={14} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalCount={filteredRequests.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={onPageChange}
-      />
-    </div>
+        <Pagination
+          currentPage={currentPage}
+          totalCount={filteredRequests.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={onPageChange}
+        />
+      </div>
+    </>
   );
 }

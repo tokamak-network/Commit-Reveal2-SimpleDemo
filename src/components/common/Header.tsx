@@ -25,11 +25,17 @@ export default function Header() {
           />
           <h1 className="text-xl font-semibold">Commit-Reveal2 Demo</h1>
         </Link>
-        <nav className="ml-6 flex gap-4">
-          <Link href="/how-it-works" className="text-sm font-medium hover:underline">
+        <nav className="ml-6 mr-1 flex gap-4">
+          <Link
+            href="/how-it-works"
+            className="text-sm font-medium hover:underline"
+          >
             How It Works
           </Link>
-          <Link href="/run-a-node" className="text-sm font-medium hover:underline">
+          <Link
+            href="/run-a-node"
+            className="text-sm font-medium hover:underline"
+          >
             Run a Node
           </Link>
         </nav>
