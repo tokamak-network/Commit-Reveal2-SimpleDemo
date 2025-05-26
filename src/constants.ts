@@ -7,7 +7,7 @@ interface ContractsConfig {
 
 export const chainsToContracts: ContractsConfig = {
   31337: {
-    consumerExample: "0x10Aeafac83d48E2f9ac4bAAf94311c45fACe1404",
+    consumerExample: "0xCABEe62adFB2a4d4172Fc2F7536f324FC52C274a",
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {

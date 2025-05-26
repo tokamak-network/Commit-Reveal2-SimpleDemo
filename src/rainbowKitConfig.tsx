@@ -10,7 +10,7 @@ export default getDefaultConfig({
   chains: [anvil, sepolia],
   ssr: false,
   transports: {
-    [anvil.id]: http("https://127.0.0.1:8545"),
+    [anvil.id]: http("http://127.0.0.1:8545"),
     [sepolia.id]: http("https://sepolia.drpc.org", {
       batch: {
         batchSize: 1,

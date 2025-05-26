@@ -64,6 +64,11 @@ export default function RequestHeader({
 
   // Function to get gas price from Infura API
   const getInfuraGasPrice = async (): Promise<bigint> => {
+    // For local network (Anvil), directly use estimateFeesPerGas
+    if (chainId === 31337) {
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    }
+
     try {
       const { data } = await axios.get(
         `https://gas.api.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_API_KEY}/networks/${chainId}/suggestedGasFees`
