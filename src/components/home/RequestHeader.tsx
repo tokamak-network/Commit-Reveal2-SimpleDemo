@@ -277,8 +277,9 @@ export default function RequestHeader({
 
       {requestDisabled && (
         <p className="text-sm text-red-500">
-          At least 2 activated operators are required to request a random
-          number.
+          Request disabled: Not enough active operators (minimum 2 required) or
+          protocol halted due to leader node being slashed. Please wait for
+          normal operating conditions.
         </p>
       )}
       <p className="text-sm text-gray-500 mb-12 mt-12">
