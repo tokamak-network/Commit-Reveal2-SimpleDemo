@@ -7,7 +7,7 @@ interface ContractsConfig {
 
 export const chainsToContracts: ContractsConfig = {
   31337: {
-    consumerExample: "0xCABEe62adFB2a4d4172Fc2F7536f324FC52C274a",
+    consumerExample: "0x10Aeafac83d48E2f9ac4bAAf94311c45fACe1404",
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {
@@ -66,7 +66,12 @@ export const consumerExampleAbi = [
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "randomNumber", type: "uint256", internalType: "uint256" },
+      {
+        name: "randomNumber",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "isRefunded", type: "bool", internalType: "bool" },
     ],
     stateMutability: "view",
   },
@@ -105,6 +110,7 @@ export const consumerExampleAbi = [
             type: "uint256",
             internalType: "uint256",
           },
+          { name: "isRefunded", type: "bool", internalType: "bool" },
         ],
       },
     ],
@@ -117,6 +123,13 @@ export const consumerExampleAbi = [
       { name: "round", type: "uint256", internalType: "uint256" },
       { name: "randomNumber", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "refund",
+    inputs: [{ name: "requestId", type: "uint256", internalType: "uint256" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -153,7 +166,12 @@ export const consumerExampleAbi = [
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "randomNumber", type: "uint256", internalType: "uint256" },
+      {
+        name: "randomNumber",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      { name: "isRefunded", type: "bool", internalType: "bool" },
     ],
     stateMutability: "view",
   },
@@ -179,6 +197,7 @@ export const consumerExampleAbi = [
     stateMutability: "nonpayable",
   },
   { type: "error", name: "InsufficientBalance", inputs: [] },
+  { type: "error", name: "NotTheRequester", inputs: [] },
   {
     type: "error",
     name: "OnlyCoordinatorCanFulfill",
