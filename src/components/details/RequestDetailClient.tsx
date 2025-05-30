@@ -4,7 +4,7 @@ import { useAccount, useChainId } from "wagmi";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useBlockData } from "../../hooks/useBlockData";
 import { useDecodedRevealOrder } from "../../hooks/useDecodedRevealOrder";
-import { useMerkleRoot } from "../../hooks/useMerkleRoot";
+import { useEnhancedMerkleRoot } from "../../hooks/useEnhancedMerkleRoot";
 import { useParticipants } from "../../hooks/useParticipants";
 import { useRequestDetail } from "../../hooks/useRequestDetail";
 import { useRequestMetadata } from "../../hooks/useRequestMetadata";
@@ -29,6 +29,7 @@ export default function RequestDetailClient({
     detailInfo,
     currentRound,
     startTime,
+    curStartTime,
     isHalted,
     isLoading,
     refetch,
@@ -60,8 +61,13 @@ export default function RequestDetailClient({
   );
 
   // 기타 데이터
-  const merkleRoot = useMerkleRoot(startTime, refreshCounter);
   const revealRows = useDecodedRevealOrder(decodedInput);
+  const merkleRoot = useEnhancedMerkleRoot(
+    startTime,
+    curStartTime,
+    revealRows,
+    refreshCounter
+  );
   const participants = useParticipants(
     requestId,
     currentRound,

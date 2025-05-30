@@ -45,6 +45,11 @@ export function useRequestDetail(requestId: string) {
         abi: commitReveal2Abi,
         functionName: "s_isInProcess",
       },
+      {
+        address: commitReveal2Address,
+        abi: commitReveal2Abi,
+        functionName: "getCurStartTime",
+      },
     ],
     query: {
       enabled: true,
@@ -99,6 +104,11 @@ export function useRequestDetail(requestId: string) {
     [result.data]
   );
 
+  const curStartTime = useMemo(
+    () => result.data?.[4]?.result as bigint | undefined,
+    [result.data]
+  );
+
   const isHalted = useMemo(() => {
     return processStatus === BigInt(3); // HALTED = 3
   }, [processStatus]);
@@ -107,6 +117,7 @@ export function useRequestDetail(requestId: string) {
     detailInfo,
     currentRound,
     startTime,
+    curStartTime,
     isHalted,
     isLoading: result.isLoading,
     error: result.error,
