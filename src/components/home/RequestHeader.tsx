@@ -276,12 +276,27 @@ export default function RequestHeader({
       )}
 
       {requestDisabled && (
-        <p className="text-sm text-red-500">
-          At least 2 activated operators are required to request a random
-          number.
-        </p>
+        <div className="p-4 mt-6 bg-orange-50 border border-orange-200 rounded-lg text-left">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <span className="text-orange-600 text-lg">⚠️</span>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-orange-800 mb-1">
+                Request Disabled
+              </h3>
+              <p className="text-sm text-orange-700">
+                Protocol halted due to insufficient active operators (minimum 2
+                required) or leader node being slashed. Please wait for normal
+                operating conditions.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
-      <p className="text-sm text-gray-500 mb-12 mt-12">
+      <p className="text-sm text-gray-500 mb-12 mt-5">
         Random numbers are requested via this Consumer{" "}
         <a
           href={getExplorerUrl(chainId, `address/${consumerExampleAddress}`)}

@@ -1,22 +1,23 @@
 "use client";
 
-import {
-  chainsToContracts,
-  commitReveal2Abi,
-  consumerExampleAbi,
-} from "@/constants";
-import { getBlock, type GetBlockReturnType } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
-import { FiRefreshCw } from "react-icons/fi";
-import { useChainId, useConfig, useReadContracts } from "wagmi";
-import { useDecodedInput } from "../../hooks/useDecodedInput";
+import { useMemo } from "react";
+import { useAccount, useChainId } from "wagmi";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import { useBlockData } from "../../hooks/useBlockData";
 import { useDecodedRevealOrder } from "../../hooks/useDecodedRevealOrder";
-import { useMerkleRoot } from "../../hooks/useMerkleRoot";
+import { useEnhancedMerkleRoot } from "../../hooks/useEnhancedMerkleRoot";
 import { useParticipants } from "../../hooks/useParticipants";
+import { useDisputeInfo, useRequestDetail } from "../../hooks/useRequestDetail";
+import { useRequestMetadata } from "../../hooks/useRequestMetadata";
 import DetailEmptyState from "./DetailEmptyState";
+import DisputeSection from "./DisputeSection";
 import ParticipatingNodes from "./ParticipatingNodes";
 import RandomNumberSection from "./RandomNumberSection";
+import RefreshButton from "./RefreshButton";
+import RefundButton from "./RefundButton";
 import RequestInfoSection from "./RequestInfoSection";
+import SecretSubmissionSection from "./SecretSubmissionSection";
+import SubmitMerkleRootSection from "./SubmitMerkleRootSection";
 
 export default function RequestDetailClient({
   requestId,
@@ -24,191 +25,32 @@ export default function RequestDetailClient({
   requestId: string;
 }) {
   const chainId = useChainId();
-  const contracts = useMemo(() => chainsToContracts[chainId], [chainId]);
-  const commitReveal2Address = useMemo(
-    () => contracts.commitReveal2 as `0x${string}`,
-    [contracts.commitReveal2]
-  );
-  const consumerExampleAddress = useMemo(
-    () => contracts.consumerExample as `0x${string}`,
-    [contracts.consumerExample]
-  );
+  const { address } = useAccount();
 
-  const result = useReadContracts({
-    contracts: [
-      {
-        address: consumerExampleAddress,
-        abi: consumerExampleAbi,
-        functionName: "getDetailInfo",
-        args: [requestId],
-      },
-      {
-        address: commitReveal2Address,
-        abi: commitReveal2Abi,
-        functionName: "s_currentRound",
-      },
-      {
-        address: commitReveal2Address,
-        abi: commitReveal2Abi,
-        functionName: "s_requestInfo",
-        args: [requestId],
-      },
-    ],
-    query: {
-      enabled: true,
-      refetchInterval: 0,
-      staleTime: 30000,
-      retry: 0,
-    },
-  });
+  // Get basic request detail info (single call)
+  const {
+    detailInfo,
+    currentRound,
+    startTime,
+    curStartTime,
+    isHalted,
+    isLoading: detailLoading,
+    refetch: detailRefetch,
+    contracts: { commitReveal2Address, consumerExampleAddress },
+  } = useRequestDetail(requestId);
 
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [refreshCounter, setRefreshCounter] = useState(0);
-
-  useEffect(() => {
-    let isMounted = true;
-    let intervalId: NodeJS.Timeout | null = null;
-
-    const fetchData = () => {
-      if (isMounted) {
-        result.refetch().catch((error) => {
-          console.error("Error refetching in details page:", error);
-        });
-        setRefreshCounter((prev) => prev + 1);
-      }
-    };
-
-    // 30초 지연 후 첫 실행
-    const timeoutId = setTimeout(() => {
-      if (isMounted) {
-        fetchData();
-        // 그 후 60초마다 실행
-        intervalId = setInterval(fetchData, 60000);
-      }
-    }, 30000);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, []);
-
-  const startTime = useMemo(
-    () => (result.data?.[2]?.result as [bigint, bigint])?.[1],
-    [result.data]
+  // Get participants using the existing hook
+  const { block: requestBlock } = useBlockData(detailInfo?.requestBlockNumber);
+  const { block: generateBlock } = useBlockData(
+    detailInfo?.isGenerated ? detailInfo.fulfillBlockNumber : undefined
   );
 
-  const config = useConfig();
-  type BlockWithTxs = GetBlockReturnType<true>;
-  const [block, setBlock] = useState<BlockWithTxs | null>(null);
-
-  const merkleRoot = useMerkleRoot(startTime, refreshCounter);
-
-  // getDetailInfo 결과 분석
-  const detailInfo = useMemo(() => {
-    if (!result.data?.[0]?.result) return null;
-
-    const [
-      requester,
-      requestFee,
-      requestBlockNumber,
-      fulfillBlockNumber,
-      randomNumber,
-    ] = result.data[0].result as [
-      `0x${string}`,
-      bigint,
-      bigint,
-      bigint,
-      bigint
-    ];
-
-    return {
-      requester,
-      requestFee,
-      requestBlockNumber,
-      fulfillBlockNumber,
-      randomNumber,
-      isGenerated: fulfillBlockNumber > BigInt(0),
-    };
-  }, [result.data]);
-
-  const requestBlockNumber = useMemo(
-    () => detailInfo?.requestBlockNumber,
-    [detailInfo]
-  );
-
-  useEffect(() => {
-    if (!requestBlockNumber || block?.number === requestBlockNumber) return;
-
-    let isMounted = true;
-    getBlock(config, {
-      blockNumber: requestBlockNumber,
-      includeTransactions: true,
-    }).then((blockData) => {
-      if (isMounted) {
-        setBlock(blockData);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [requestBlockNumber, config]);
-
-  const generateBlockNumber = useMemo(
-    () => (detailInfo?.isGenerated ? detailInfo.fulfillBlockNumber : undefined),
-    [detailInfo]
-  );
-
-  const [generateBlock, setGenerateBlock] = useState<BlockWithTxs | null>(null);
-
-  useEffect(() => {
-    if (
-      !generateBlockNumber ||
-      generateBlockNumber === BigInt(0) ||
-      generateBlock?.number === generateBlockNumber
-    )
-      return;
-
-    let isMounted = true;
-    getBlock(config, {
-      blockNumber: generateBlockNumber,
-      includeTransactions: true,
-    }).then((blockData) => {
-      if (isMounted) {
-        setGenerateBlock(blockData);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [generateBlockNumber, config]);
-
-  const generateTime = useMemo(
-    () =>
-      generateBlock
-        ? new Date(Number(generateBlock.timestamp) * 1000).toLocaleString()
-        : undefined,
-    [generateBlock]
-  );
-
-  const generateTx = useMemo(
-    () =>
-      generateBlock?.transactions.find(
-        (tx) => tx.to?.toLowerCase() === commitReveal2Address.toLowerCase()
-      ),
-    [generateBlock, commitReveal2Address]
-  );
-
-  const decodedInput = useDecodedInput(generateTx?.input);
-
-  const revealRows = useDecodedRevealOrder(decodedInput);
-
-  const currentRound = useMemo(
-    () => result.data?.[1]?.result as bigint | undefined,
-    [result.data]
+  const { requestMetadata, generateInfo, decodedInput } = useRequestMetadata(
+    requestBlock,
+    generateBlock,
+    detailInfo,
+    consumerExampleAddress,
+    commitReveal2Address
   );
 
   const participants = useParticipants(
@@ -218,65 +60,133 @@ export default function RequestDetailClient({
     startTime
   );
 
-  // 요청 메타데이터
-  const requestMetadata = useMemo(() => {
-    if (!block || !detailInfo)
-      return { requestTime: undefined, requestTxHash: undefined };
+  // Get dispute info using separate hook
+  const {
+    disputeInfo,
+    isLoading: disputeLoading,
+    refetch: disputeRefetch,
+  } = useDisputeInfo(startTime, participants);
 
-    const requestTime = new Date(
-      Number(block.timestamp) * 1000
-    ).toLocaleString();
+  // Check if this is a historical dispute case where data is not available
+  const isHistoricalDispute =
+    disputeInfo?.secretRequested &&
+    startTime !== undefined &&
+    curStartTime !== undefined &&
+    startTime !== curStartTime;
 
-    // 트랜잭션 필터링 - detailInfo의 requester 기반으로 필터링
-    const requestTxHash = block.transactions.find(
-      (tx) =>
-        tx.to?.toLowerCase() === consumerExampleAddress.toLowerCase() &&
-        tx.from.toLowerCase() === detailInfo.requester.toLowerCase()
-    )?.hash;
+  const isLoading = detailLoading || disputeLoading;
 
-    return {
-      requestTime,
-      requestTxHash,
-    };
-  }, [block, detailInfo, consumerExampleAddress]);
+  // 자동 새로고침 관리 (상세 페이지는 덜 자주 업데이트)
+  const { refreshCounter, isSpinning, manualRefresh } = useAutoRefresh(
+    async () => {
+      await detailRefetch();
+      await disputeRefetch();
+    },
+    {
+      initialDelay: 30000, // 30초 후 첫 실행
+      interval: 60000, // 60초마다 반복
+    }
+  );
+
+  // 기타 데이터
+  const revealRows = useDecodedRevealOrder(decodedInput);
+  const merkleRoot = useEnhancedMerkleRoot(
+    startTime,
+    curStartTime,
+    revealRows,
+    refreshCounter
+  );
+
+  // Extract final secret if this was generated through dispute and we have generateInfo
+  const finalSecret = useMemo(() => {
+    if (
+      disputeInfo?.secretRequested &&
+      generateInfo.generateTxHash &&
+      decodedInput
+    ) {
+      // Check if decodedInput.secretList has only one secret (dispute case)
+      if (decodedInput.secretList && decodedInput.secretList.length === 1) {
+        return decodedInput.secretList[0];
+      }
+    }
+    return undefined;
+  }, [disputeInfo?.secretRequested, generateInfo.generateTxHash, decodedInput]);
+
+  // 로딩 상태 또는 데이터가 없는 경우
+  const shouldShowEmptyState =
+    !requestBlock || !detailInfo || detailInfo.requestBlockNumber === BigInt(0);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-[80vh] px-6 w-full items-center justify-center">
+        <div className="text-lg text-gray-600">Loading request details...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-[80vh] px-6 w-full items-start">
       <div className="mt-12 w-full max-w-5xl mx-auto space-y-10 items-start text-left">
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => {
-              setIsSpinning(true);
-              setRefreshCounter((prev) => prev + 1);
-              result.refetch().finally(() => {
-                setTimeout(() => setIsSpinning(false), 500);
-              });
-            }}
-            className="text-blue-600 hover:text-blue-800 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <FiRefreshCw
-              size={18}
-              className={isSpinning ? "animate-spin" : ""}
-            />
-            Refresh
-          </button>
-        </div>
+        <RefreshButton onRefresh={manualRefresh} isSpinning={isSpinning} />
+
         <h1 className="text-2xl font-bold">Request Details</h1>
 
         <div className="w-full">
           <h2 className="font-semibold text-lg text-gray-800 mb-2">
             Request ID: <span className="font-mono break-all">{requestId}</span>
           </h2>
-          {!block ||
-          !detailInfo ||
-          detailInfo.requestBlockNumber === BigInt(0) ? (
+
+          {/* Refund button - show when halted, not generated, and user is requester */}
+          {!shouldShowEmptyState &&
+            detailInfo &&
+            isHalted &&
+            !detailInfo.isGenerated &&
+            !detailInfo.isRefunded &&
+            address &&
+            detailInfo.requester.toLowerCase() === address.toLowerCase() && (
+              <div className="mb-4">
+                <RefundButton
+                  requestId={requestId}
+                  consumerExampleAddress={consumerExampleAddress}
+                  chainId={chainId}
+                  requestFee={detailInfo.requestFee}
+                  onRefundSuccess={manualRefresh}
+                />
+              </div>
+            )}
+
+          {/* Refunded status indicator */}
+          {!shouldShowEmptyState && detailInfo && detailInfo.isRefunded && (
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span className="text-gray-600 text-lg">✓</span>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-800">
+                    Request Refunded
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1">
+                    This request has been refunded. The request fee has been
+                    returned to the requester.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {shouldShowEmptyState ? (
             <DetailEmptyState />
           ) : (
             <>
-              <ParticipatingNodes
-                participants={participants}
-                chainId={chainId}
-              />
+              {!isHistoricalDispute && participants.length > 0 && (
+                <ParticipatingNodes
+                  participants={participants}
+                  chainId={chainId}
+                />
+              )}
 
               <div className="space-y-6">
                 <RequestInfoSection
@@ -287,13 +197,74 @@ export default function RequestDetailClient({
                   chainId={chainId}
                 />
 
+                {/* Historical Dispute Warning Message */}
+                {isHistoricalDispute && (
+                  <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                          <span className="text-amber-600 text-xl">⚠️</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-amber-800 mb-3">
+                          Historical Dispute Data Unavailable
+                        </h3>
+                        <p className="text-sm text-amber-700 leading-relaxed">
+                          This random number was generated through an on-chain
+                          dispute process this round. The smart contract does
+                          not maintain historical data for past rounds, and when
+                          on-chain disputes occur in subsequent rounds, the
+                          previous data gets overwritten. As a result, we cannot
+                          retrieve the original merkle root, participating
+                          nodes, secrets, reveal orders, and other detailed
+                          information for this request.
+                        </p>
+                        <p className="text-sm text-amber-700 mt-3">
+                          Only the basic request information and final random
+                          number result are available below.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isHistoricalDispute && (
+                  <>
+                    {/* Cv Dispute Section */}
+                    {disputeInfo?.cvRequested && (
+                      <DisputeSection
+                        disputeType="cv"
+                        disputeData={disputeInfo.cvRequested}
+                      />
+                    )}
+
+                    <SubmitMerkleRootSection merkleRoot={merkleRoot} />
+
+                    {/* Co Dispute Section */}
+                    {disputeInfo?.coRequested && (
+                      <DisputeSection
+                        disputeType="co"
+                        disputeData={disputeInfo.coRequested}
+                      />
+                    )}
+
+                    {/* Secret Submission Section */}
+                    {disputeInfo?.secretRequested && (
+                      <SecretSubmissionSection
+                        secretRequested={disputeInfo.secretRequested}
+                        finalSecret={finalSecret}
+                      />
+                    )}
+                  </>
+                )}
+
                 <RandomNumberSection
-                  merkleRoot={merkleRoot}
                   isGenerated={detailInfo.isGenerated}
-                  revealRows={revealRows}
+                  revealRows={isHistoricalDispute ? [] : revealRows}
                   randomNumber={detailInfo.randomNumber}
-                  generateTime={generateTime}
-                  generateTxHash={generateTx?.hash}
+                  generateTime={generateInfo.generateTime}
+                  generateTxHash={generateInfo.generateTxHash}
                   chainId={chainId}
                 />
               </div>

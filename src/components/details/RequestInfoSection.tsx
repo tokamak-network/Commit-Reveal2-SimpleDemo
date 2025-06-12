@@ -27,7 +27,7 @@ export default function RequestInfoSection({
 
   return (
     <div>
-      <h3 className="font-semibold text-lg mb-2">Request Random Number</h3>
+      <h3 className="font-semibold text-lg mb-2">Request a Random Number</h3>
       <p>
         Requester:{" "}
         <a

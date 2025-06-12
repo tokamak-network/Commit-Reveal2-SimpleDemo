@@ -6,7 +6,6 @@ import { LuExternalLink } from "react-icons/lu";
 import RevealOrderTable from "./RevealOrderTable";
 
 export default function RandomNumberSection({
-  merkleRoot,
   isGenerated,
   revealRows,
   randomNumber,
@@ -14,7 +13,6 @@ export default function RandomNumberSection({
   generateTxHash,
   chainId,
 }: {
-  merkleRoot: string | null;
   isGenerated: boolean | undefined;
   revealRows: {
     revealOrder: number;
@@ -51,34 +49,20 @@ export default function RandomNumberSection({
 
   return (
     <div>
-      <h3 className="font-semibold text-lg mb-2">
-        Random Number Generation Process
-      </h3>
-      <div className="mb-4">
-        <p>
-          <span className="font-semibold">Merkle Root:</span>{" "}
-          {merkleRoot ? (
-            <span className="font-mono">{merkleRoot}</span>
-          ) : (
-            <span className="text-gray-500 italic">Not submitted yet</span>
-          )}
-        </p>
-      </div>
+      <h3 className="font-semibold text-lg mb-2">Generate a Random Number</h3>
       {!isGenerated ? (
         <p className="text-gray-500 italic mt-2">
           Random number has not been generated for this request.
         </p>
       ) : (
         <div>
-          <p className="font-semibold mt-4">
-            Secrets used to generate the random number:
-          </p>
-          {hasRevealRows ? (
-            <RevealOrderTable revealRows={revealRows} />
-          ) : (
-            <p className="text-gray-500 italic mt-2">
-              No reveal data available
-            </p>
+          {hasRevealRows && (
+            <>
+              <p className="font-semibold">
+                Secrets used to generate the random number:
+              </p>
+              <RevealOrderTable revealRows={revealRows} />
+            </>
           )}
           <p className="font-semibold mt-4">Random Number:</p>
           <div className="ml-6">

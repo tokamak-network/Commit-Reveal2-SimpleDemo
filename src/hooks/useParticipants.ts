@@ -48,6 +48,15 @@ export function useParticipants(
 
           const { vList, rsList, cvList } = input;
 
+          // If this is a dispute case (empty vList/rsList), return empty participants
+          if (vList.length === 0 || rsList.length === 0) {
+            if (isMounted) {
+              setParticipants([]);
+            }
+            isLoading = false;
+            return;
+          }
+
           const domain = {
             name: "Commit Reveal2",
             version: "1",

@@ -11,6 +11,12 @@ export function useDecodedRevealOrder(
 
     try {
       const { secretList, packedRevealOrder } = decoded;
+
+      // If packedRevealOrder is undefined (dispute case), return empty array
+      if (packedRevealOrder === undefined) {
+        return [];
+      }
+
       const packedBytes = new Uint8Array(secretList.length);
 
       let temp = packedRevealOrder;

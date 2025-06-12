@@ -1,11 +1,2 @@
-export interface Request {
-  id: string;
-  status: string;
-  randomNumber: string;
-  requester: string;
-}
-
-export interface ActivatedNode {
-  index: number;
-  address: string;
-}
+// Re-export types from the centralized types directory
+export type { ActivatedNode, HomeData, Request } from "@/types/home";
