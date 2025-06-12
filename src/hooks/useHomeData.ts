@@ -108,6 +108,7 @@ export function useHomeData() {
         fulfillBlockNumber,
         randomNumber,
         isRefunded,
+        requestFee,
       } = info;
 
       result.push({
@@ -116,6 +117,7 @@ export function useHomeData() {
         status: fulfillBlockNumber > BigInt(0) ? "Fulfilled" : "Pending",
         randomNumber: randomNumber.toString(),
         isRefunded,
+        requestFee: requestFee.toString(),
       });
     }
 

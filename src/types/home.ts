@@ -4,6 +4,7 @@ export interface Request {
   randomNumber: string;
   requester: string;
   isRefunded: boolean;
+  requestFee: string;
 }
 
 export interface ActivatedNode {
