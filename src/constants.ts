@@ -11,8 +11,8 @@ export const chainsToContracts: ContractsConfig = {
     commitReveal2: "0xfbfbfDdd6e35dA57b7B0F9a2C10E34Be70B3A4E9",
   },
   11155111: {
-    consumerExample: "0xf853bFAc09D8635cc4EbaF5BEfC93d1B016CD449",
-    commitReveal2: "0xfCca8587CE5d51c6f5C546aAc6e4866751f7E074",
+    consumerExample: "0x86651a7186AE87CdEFdB489c01e2b5f941a26EC9",
+    commitReveal2: "0x31fF8fd03aD22EF400E6E9fF318Fa579539AB1a8",
   },
 };
 
@@ -40,6 +40,13 @@ export const consumerExampleAbi = [
     name: "CALLBACK_GAS_LIMIT",
     inputs: [],
     outputs: [{ name: "", type: "uint32", internalType: "uint32" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "TSLOT",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -111,6 +118,11 @@ export const consumerExampleAbi = [
             internalType: "uint256",
           },
           { name: "isRefunded", type: "bool", internalType: "bool" },
+          {
+            name: "requestFee",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
     ],
@@ -150,7 +162,6 @@ export const consumerExampleAbi = [
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "requestFee", type: "uint256", internalType: "uint256" },
     ],
     stateMutability: "view",
   },
@@ -172,6 +183,7 @@ export const consumerExampleAbi = [
         internalType: "uint256",
       },
       { name: "isRefunded", type: "bool", internalType: "bool" },
+      { name: "requestFee", type: "uint256", internalType: "uint256" },
     ],
     stateMutability: "view",
   },
@@ -196,6 +208,7 @@ export const consumerExampleAbi = [
     outputs: [],
     stateMutability: "nonpayable",
   },
+  { type: "error", name: "ETHTransferFailed", inputs: [] },
   { type: "error", name: "InsufficientBalance", inputs: [] },
   { type: "error", name: "NotTheRequester", inputs: [] },
   {
@@ -493,12 +506,86 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "getDisputeInfos",
+    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "requestedToSubmitCvTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitCvPackedIndicesAscFromLSB",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "zeroBitIfSubmittedCvBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitCoTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitCoPackedIndices",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitCoLength",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "zeroBitIfSubmittedCoBitmap",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "previousSSubmitTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "packedRevealOrders",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitSFromIndexK",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getMerkleRoot",
     inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
     outputs: [
       { name: "", type: "bytes32", internalType: "bytes32" },
       { name: "", type: "bool", internalType: "bool" },
     ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getSecrets",
+    inputs: [{ name: "k", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "secrets", type: "bytes32[]", internalType: "bytes32[]" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getZeroBitIfSubmittedCoOnChainBitmap",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
   {
@@ -659,6 +746,20 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "s_bitSetIfRequestedToSubmitCv_zeroBitIfSubmittedCv_bitmap128x2",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "s_cos",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "s_currentRound",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -773,14 +874,7 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
-    name: "s_requestedToSubmitCvLength",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "s_requestedToSubmitCvPackedIndices",
+    name: "s_requestedToSubmitCvPackedIndicesAscFromLSB",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
@@ -830,13 +924,6 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "s_zeroBitIfSubmittedCoBitmap",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "s_zeroBitIfSubmittedCvBitmap",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
@@ -1132,6 +1219,12 @@ export const commitReveal2Abi = [
         internalType: "uint256",
       },
       {
+        name: "indicesLength",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
         name: "packedIndices",
         type: "uint256",
         indexed: false,
@@ -1228,6 +1321,8 @@ export const commitReveal2Abi = [
   { type: "error", name: "AllSubmittedCo", inputs: [] },
   { type: "error", name: "AllSubmittedCv", inputs: [] },
   { type: "error", name: "AlreadyActivated", inputs: [] },
+  { type: "error", name: "AlreadyCompleted", inputs: [] },
+  { type: "error", name: "AlreadyHalted", inputs: [] },
   { type: "error", name: "AlreadyInitialized", inputs: [] },
   { type: "error", name: "AlreadyRefunded", inputs: [] },
   { type: "error", name: "AlreadyRequestedToSubmitCo", inputs: [] },
@@ -1239,6 +1334,7 @@ export const commitReveal2Abi = [
   { type: "error", name: "CvNotEqualDoubleHashS", inputs: [] },
   { type: "error", name: "CvNotEqualHashCo", inputs: [] },
   { type: "error", name: "CvNotRequested", inputs: [] },
+  { type: "error", name: "CvNotRequestedForThisOperator", inputs: [] },
   { type: "error", name: "CvNotSubmitted", inputs: [] },
   { type: "error", name: "DuplicateIndices", inputs: [] },
   { type: "error", name: "ETHTransferFailed", inputs: [] },
@@ -1287,6 +1383,7 @@ export const commitReveal2Abi = [
   },
   { type: "error", name: "TooEarly", inputs: [] },
   { type: "error", name: "TooLate", inputs: [] },
+  { type: "error", name: "TooManyRequestsQueued", inputs: [] },
   { type: "error", name: "TransferFailed", inputs: [] },
   { type: "error", name: "Unauthorized", inputs: [] },
   { type: "error", name: "WrongRevealOrder", inputs: [] },
