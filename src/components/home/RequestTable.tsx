@@ -1,13 +1,17 @@
 "use client";
 
 import { consumerExampleAbi, getExplorerUrl } from "@/constants";
+import { estimateFeesPerGas, estimateGas } from "@wagmi/core";
+import axios from "axios";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { CiCircleQuestion } from "react-icons/ci";
 import { LuExternalLink } from "react-icons/lu";
+import { encodeFunctionData, formatEther, parseGwei } from "viem";
 import {
   useAccount,
+  useConfig,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -36,11 +40,19 @@ export default function RequestTable({
   onRefundSuccess,
 }: Props) {
   const { address } = useAccount();
+  const config = useConfig();
   const [showOnlyMyRequests, setShowOnlyMyRequests] = useState(false);
   const [refundingRequestId, setRefundingRequestId] = useState<string | null>(
     null
   );
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmModalData, setConfirmModalData] = useState<{
+    requestId: string;
+    requestFee: bigint;
+    networkFee: bigint;
+    youReceive: bigint;
+  } | null>(null);
 
   const { data: hash, isPending, writeContractAsync } = useWriteContract();
 
@@ -68,15 +80,79 @@ export default function RequestTable({
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentRequests = sortedRequests.slice(indexOfFirst, indexOfLast);
 
-  async function handleRefund(requestId: string) {
+  // Function to get gas price from Infura API
+  const getInfuraGasPrice = async (): Promise<bigint> => {
+    // For local network (Anvil), directly use estimateFeesPerGas
+    if (chainId === 31337) {
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    }
+
     try {
-      setRefundingRequestId(requestId);
+      const { data } = await axios.get(
+        `https://gas.api.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_API_KEY}/networks/${chainId}/suggestedGasFees`
+      );
+
+      // Convert maxFeePerGas from gwei to wei
+      if (data && data.medium.suggestedMaxFeePerGas) {
+        return parseGwei(data.medium.suggestedMaxFeePerGas);
+      }
+
+      // Fallback to wagmi's estimateFeesPerGas if Infura API fails or returns unexpected format
+      console.log("Falling back to estimateFeesPerGas");
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    } catch (error) {
+      console.error("Error fetching gas price from Infura:", error);
+      // Fallback to wagmi's estimateFeesPerGas
+      return (await estimateFeesPerGas(config)).maxFeePerGas;
+    }
+  };
+
+  async function handleRefundClick(requestId: string) {
+    try {
+      // Find the request to get the requestFee
+      const request = requests.find((req) => req.id === requestId);
+      if (!request) return;
+
+      const requestFee = BigInt(request.requestFee);
+
+      // Get gas price and estimate network fee
+      const gasPrice = await getInfuraGasPrice();
+      const data = encodeFunctionData({
+        abi: consumerExampleAbi,
+        functionName: "refund",
+        args: [requestId],
+      });
+      const estimatedGasUsed = await estimateGas(config, {
+        data: data,
+        to: consumerExampleAddress,
+      });
+      const networkFee = estimatedGasUsed * gasPrice;
+      const youReceive = requestFee - networkFee;
+
+      setConfirmModalData({
+        requestId,
+        requestFee,
+        networkFee,
+        youReceive,
+      });
+      setShowConfirmModal(true);
+    } catch (err) {
+      console.error("Failed to prepare refund:", err);
+    }
+  }
+
+  async function handleRefund() {
+    if (!confirmModalData) return;
+
+    try {
+      setRefundingRequestId(confirmModalData.requestId);
       await writeContractAsync({
         abi: consumerExampleAbi,
         address: consumerExampleAddress,
         functionName: "refund",
-        args: [requestId],
+        args: [confirmModalData.requestId],
       });
+      setShowConfirmModal(false);
       setShowRefundModal(true);
     } catch (err) {
       console.error("Refund failed:", err);
@@ -90,6 +166,11 @@ export default function RequestTable({
     if (isConfirmed && onRefundSuccess) {
       onRefundSuccess();
     }
+  }
+
+  function closeConfirmModal() {
+    setShowConfirmModal(false);
+    setConfirmModalData(null);
   }
 
   // Check if error is specifically a DRPC timeout error
@@ -244,7 +325,7 @@ export default function RequestTable({
                             address.toLowerCase() && (
                             <div className="relative group">
                               <button
-                                onClick={() => handleRefund(req.id)}
+                                onClick={() => handleRefundClick(req.id)}
                                 disabled={
                                   isPending ||
                                   isConfirming ||
@@ -314,6 +395,65 @@ export default function RequestTable({
           onPageChange={onPageChange}
         />
       </div>
+
+      {/* Refund Confirmation Modal */}
+      {showConfirmModal && confirmModalData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white relative rounded-4xl shadow-xl p-6 w-full max-w-md min-h-[200px] space-y-4">
+            <div className="flex items-center justify-between absolute top-4 left-6 right-6">
+              <div className="flex-1">
+                <h2 className="text-sm font-semibold text-gray-500 text-left">
+                  Confirm Refund for Request {confirmModalData.requestId}
+                </h2>
+              </div>
+              <button
+                onClick={closeConfirmModal}
+                className="text-xl text-gray-400 hover:text-gray-600 ml-auto cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="text-[15px] text-gray-700 space-y-1 pt-12 text-left">
+              <div className="flex justify-between items-center">
+                <span>+ Refund Amount:</span>
+                <span className="font-mono text-green-600">
+                  {formatEther(confirmModalData.requestFee)} ETH
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>- Network Fee:</span>
+                <span className="font-mono text-red-600">
+                  {formatEther(confirmModalData.networkFee)} ETH
+                </span>
+              </div>
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">= You Receive:</span>
+                  <span className="font-mono font-semibold text-blue-600">
+                    {formatEther(confirmModalData.youReceive)} ETH
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleRefund}
+              disabled={isPending}
+              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <CgSpinner className="animate-spin" size={16} />
+                  <span>Confirming in wallet...</span>
+                </div>
+              ) : (
+                "Send a Transaction"
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Refund Modal */}
       {showRefundModal && refundingRequestId && (

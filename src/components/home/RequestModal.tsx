@@ -110,6 +110,14 @@ export default function RequestModal({
                 );
               })()}
           </div>
+        ) : isPending || isConfirming ? (
+          <div className="text-[15px] text-gray-700 space-y-1 pt-12 text-left">
+            <p>Requesting a random number...</p>
+            <p>
+              Please confirm the transaction in your wallet and wait for it to
+              be processed on the blockchain.
+            </p>
+          </div>
         ) : (
           <div className="text-[15px] text-gray-700 space-y-1 pt-12 text-left">
             <p>
