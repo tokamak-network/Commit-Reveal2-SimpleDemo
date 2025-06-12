@@ -1,19 +1,22 @@
 "use client";
 
+import { useMemo } from "react";
 import { useAccount, useChainId } from "wagmi";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useBlockData } from "../../hooks/useBlockData";
 import { useDecodedRevealOrder } from "../../hooks/useDecodedRevealOrder";
 import { useEnhancedMerkleRoot } from "../../hooks/useEnhancedMerkleRoot";
 import { useParticipants } from "../../hooks/useParticipants";
-import { useRequestDetail } from "../../hooks/useRequestDetail";
+import { useDisputeInfo, useRequestDetail } from "../../hooks/useRequestDetail";
 import { useRequestMetadata } from "../../hooks/useRequestMetadata";
 import DetailEmptyState from "./DetailEmptyState";
+import DisputeSection from "./DisputeSection";
 import ParticipatingNodes from "./ParticipatingNodes";
 import RandomNumberSection from "./RandomNumberSection";
 import RefreshButton from "./RefreshButton";
 import RefundButton from "./RefundButton";
 import RequestInfoSection from "./RequestInfoSection";
+import SecretSubmissionSection from "./SecretSubmissionSection";
 import SubmitMerkleRootSection from "./SubmitMerkleRootSection";
 
 export default function RequestDetailClient({
@@ -24,40 +27,65 @@ export default function RequestDetailClient({
   const chainId = useChainId();
   const { address } = useAccount();
 
-  // 요청 상세 정보 가져오기
+  // Get basic request detail info (single call)
   const {
     detailInfo,
     currentRound,
     startTime,
     curStartTime,
     isHalted,
-    isLoading,
-    refetch,
+    isLoading: detailLoading,
+    refetch: detailRefetch,
     contracts: { commitReveal2Address, consumerExampleAddress },
   } = useRequestDetail(requestId);
 
-  // 자동 새로고침 관리 (상세 페이지는 덜 자주 업데이트)
-  const { refreshCounter, isSpinning, manualRefresh } = useAutoRefresh(
-    refetch,
-    {
-      initialDelay: 30000, // 30초 후 첫 실행
-      interval: 60000, // 60초마다 반복
-    }
-  );
-
-  // 블록 데이터 가져오기
+  // Get participants using the existing hook
   const { block: requestBlock } = useBlockData(detailInfo?.requestBlockNumber);
   const { block: generateBlock } = useBlockData(
     detailInfo?.isGenerated ? detailInfo.fulfillBlockNumber : undefined
   );
 
-  // 메타데이터 처리
   const { requestMetadata, generateInfo, decodedInput } = useRequestMetadata(
     requestBlock,
     generateBlock,
     detailInfo,
     consumerExampleAddress,
     commitReveal2Address
+  );
+
+  const participants = useParticipants(
+    requestId,
+    currentRound,
+    decodedInput,
+    startTime
+  );
+
+  // Get dispute info using separate hook
+  const {
+    disputeInfo,
+    isLoading: disputeLoading,
+    refetch: disputeRefetch,
+  } = useDisputeInfo(startTime, participants);
+
+  // Check if this is a historical dispute case where data is not available
+  const isHistoricalDispute =
+    disputeInfo?.secretRequested &&
+    startTime !== undefined &&
+    curStartTime !== undefined &&
+    startTime !== curStartTime;
+
+  const isLoading = detailLoading || disputeLoading;
+
+  // 자동 새로고침 관리 (상세 페이지는 덜 자주 업데이트)
+  const { refreshCounter, isSpinning, manualRefresh } = useAutoRefresh(
+    async () => {
+      await detailRefetch();
+      await disputeRefetch();
+    },
+    {
+      initialDelay: 30000, // 30초 후 첫 실행
+      interval: 60000, // 60초마다 반복
+    }
   );
 
   // 기타 데이터
@@ -68,16 +96,33 @@ export default function RequestDetailClient({
     revealRows,
     refreshCounter
   );
-  const participants = useParticipants(
-    requestId,
-    currentRound,
-    decodedInput,
-    startTime
-  );
+
+  // Extract final secret if this was generated through dispute and we have generateInfo
+  const finalSecret = useMemo(() => {
+    if (
+      disputeInfo?.secretRequested &&
+      generateInfo.generateTxHash &&
+      decodedInput
+    ) {
+      // Check if decodedInput.secretList has only one secret (dispute case)
+      if (decodedInput.secretList && decodedInput.secretList.length === 1) {
+        return decodedInput.secretList[0];
+      }
+    }
+    return undefined;
+  }, [disputeInfo?.secretRequested, generateInfo.generateTxHash, decodedInput]);
 
   // 로딩 상태 또는 데이터가 없는 경우
   const shouldShowEmptyState =
     !requestBlock || !detailInfo || detailInfo.requestBlockNumber === BigInt(0);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-[80vh] px-6 w-full items-center justify-center">
+        <div className="text-lg text-gray-600">Loading request details...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-[80vh] px-6 w-full items-start">
@@ -104,6 +149,7 @@ export default function RequestDetailClient({
                   requestId={requestId}
                   consumerExampleAddress={consumerExampleAddress}
                   chainId={chainId}
+                  requestFee={detailInfo.requestFee}
                   onRefundSuccess={manualRefresh}
                 />
               </div>
@@ -135,10 +181,12 @@ export default function RequestDetailClient({
             <DetailEmptyState />
           ) : (
             <>
-              <ParticipatingNodes
-                participants={participants}
-                chainId={chainId}
-              />
+              {!isHistoricalDispute && participants.length > 0 && (
+                <ParticipatingNodes
+                  participants={participants}
+                  chainId={chainId}
+                />
+              )}
 
               <div className="space-y-6">
                 <RequestInfoSection
@@ -149,11 +197,71 @@ export default function RequestDetailClient({
                   chainId={chainId}
                 />
 
-                <SubmitMerkleRootSection merkleRoot={merkleRoot} />
+                {/* Historical Dispute Warning Message */}
+                {isHistoricalDispute && (
+                  <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                          <span className="text-amber-600 text-xl">⚠️</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-amber-800 mb-3">
+                          Historical Dispute Data Unavailable
+                        </h3>
+                        <p className="text-sm text-amber-700 leading-relaxed">
+                          This random number was generated through an on-chain
+                          dispute process this round. The smart contract does
+                          not maintain historical data for past rounds, and when
+                          on-chain disputes occur in subsequent rounds, the
+                          previous data gets overwritten. As a result, we cannot
+                          retrieve the original merkle root, participating
+                          nodes, secrets, reveal orders, and other detailed
+                          information for this request.
+                        </p>
+                        <p className="text-sm text-amber-700 mt-3">
+                          Only the basic request information and final random
+                          number result are available below.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isHistoricalDispute && (
+                  <>
+                    {/* Cv Dispute Section */}
+                    {disputeInfo?.cvRequested && (
+                      <DisputeSection
+                        disputeType="cv"
+                        disputeData={disputeInfo.cvRequested}
+                      />
+                    )}
+
+                    <SubmitMerkleRootSection merkleRoot={merkleRoot} />
+
+                    {/* Co Dispute Section */}
+                    {disputeInfo?.coRequested && (
+                      <DisputeSection
+                        disputeType="co"
+                        disputeData={disputeInfo.coRequested}
+                      />
+                    )}
+
+                    {/* Secret Submission Section */}
+                    {disputeInfo?.secretRequested && (
+                      <SecretSubmissionSection
+                        secretRequested={disputeInfo.secretRequested}
+                        finalSecret={finalSecret}
+                      />
+                    )}
+                  </>
+                )}
 
                 <RandomNumberSection
                   isGenerated={detailInfo.isGenerated}
-                  revealRows={revealRows}
+                  revealRows={isHistoricalDispute ? [] : revealRows}
                   randomNumber={detailInfo.randomNumber}
                   generateTime={generateInfo.generateTime}
                   generateTxHash={generateInfo.generateTxHash}

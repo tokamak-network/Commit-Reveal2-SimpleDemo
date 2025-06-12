@@ -56,15 +56,13 @@ export default function RandomNumberSection({
         </p>
       ) : (
         <div>
-          <p className="font-semibold">
-            Secrets used to generate the random number:
-          </p>
-          {hasRevealRows ? (
-            <RevealOrderTable revealRows={revealRows} />
-          ) : (
-            <p className="text-gray-500 italic mt-2">
-              No reveal data available
-            </p>
+          {hasRevealRows && (
+            <>
+              <p className="font-semibold">
+                Secrets used to generate the random number:
+              </p>
+              <RevealOrderTable revealRows={revealRows} />
+            </>
           )}
           <p className="font-semibold mt-4">Random Number:</p>
           <div className="ml-6">
