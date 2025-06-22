@@ -492,6 +492,16 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "getCurRoundAndStartTime",
+    inputs: [],
+    outputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "uint256", internalType: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getCurStartTime",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -564,6 +574,29 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "getDisputeTimestamps",
+    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "requestedToSubmitCvTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestedToSubmitCoTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "previousSSubmitTimestamp",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getMerkleRoot",
     inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
     outputs: [
@@ -575,7 +608,7 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "getSecrets",
-    inputs: [{ name: "k", type: "uint256", internalType: "uint256" }],
+    inputs: [{ name: "length", type: "uint256", internalType: "uint256" }],
     outputs: [
       { name: "secrets", type: "bytes32[]", internalType: "bytes32[]" },
     ],
