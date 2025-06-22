@@ -55,6 +55,18 @@ export function useHomeData() {
     },
   });
 
+  // 현재 라운드 및 시작 시간 가져오기
+  const curRoundResult = useReadContract({
+    ...commitReveal2Contract,
+    functionName: "getCurRoundAndStartTime",
+    query: {
+      enabled: true,
+      refetchInterval: 0,
+      staleTime: 30000,
+      retry: 0,
+    },
+  });
+
   // 요청 정보 가져오기
   const requestsResult = useReadContract({
     ...consumerExampleContract,
@@ -66,6 +78,67 @@ export function useHomeData() {
       retry: 0,
     },
   });
+
+  // 현재 라운드 정보 파싱
+  const curRoundData = useMemo(() => {
+    if (curRoundResult.status !== "success" || !curRoundResult.data) {
+      return { curRound: null, curTimestamp: null };
+    }
+    const [curRound, curTimestamp] = curRoundResult.data as [bigint, bigint];
+    return {
+      curRound: curRound.toString(),
+      curTimestamp: curTimestamp.toString(),
+    };
+  }, [curRoundResult.status, curRoundResult.data]);
+
+  // 분쟁 타임스탬프 가져오기 (현재 타임스탬프가 있을 때만)
+  const disputeTimestampsResult = useReadContract({
+    ...commitReveal2Contract,
+    functionName: "getDisputeTimestamps",
+    args: curRoundData.curTimestamp
+      ? [BigInt(curRoundData.curTimestamp)]
+      : undefined,
+    query: {
+      enabled: !!curRoundData.curTimestamp,
+      refetchInterval: 0,
+      staleTime: 30000,
+      retry: 0,
+    },
+  });
+
+  // 분쟁 정보 파싱
+  const disputeInfo = useMemo(() => {
+    if (
+      disputeTimestampsResult.status !== "success" ||
+      !disputeTimestampsResult.data ||
+      !curRoundData.curRound
+    ) {
+      return { hasDispute: false, curRound: curRoundData.curRound };
+    }
+
+    const [
+      requestedToSubmitCvTimestamp,
+      requestedToSubmitCoTimestamp,
+      previousSSubmitTimestamp,
+    ] = disputeTimestampsResult.data as [bigint, bigint, bigint];
+
+    const hasDispute =
+      requestedToSubmitCvTimestamp > BigInt(0) ||
+      requestedToSubmitCoTimestamp > BigInt(0) ||
+      previousSSubmitTimestamp > BigInt(0);
+
+    return {
+      hasDispute,
+      curRound: curRoundData.curRound,
+      requestedToSubmitCvTimestamp: requestedToSubmitCvTimestamp.toString(),
+      requestedToSubmitCoTimestamp: requestedToSubmitCoTimestamp.toString(),
+      previousSSubmitTimestamp: previousSSubmitTimestamp.toString(),
+    };
+  }, [
+    disputeTimestampsResult.status,
+    disputeTimestampsResult.data,
+    curRoundData.curRound,
+  ]);
 
   // 데이터 파싱
   const activatedOperators = useMemo(() => {
@@ -141,17 +214,31 @@ export function useHomeData() {
     activatedNodeList,
     requestDisabled,
     isHalted,
+    disputeInfo,
   };
 
   const refetch = async () => {
-    await Promise.all([operatorsResult.refetch(), requestsResult.refetch()]);
+    await Promise.all([
+      operatorsResult.refetch(),
+      requestsResult.refetch(),
+      curRoundResult.refetch(),
+      disputeTimestampsResult.refetch(),
+    ]);
   };
 
   return {
     homeData,
     contracts,
-    isLoading: operatorsResult.isLoading || requestsResult.isLoading,
-    error: operatorsResult.error || requestsResult.error,
+    isLoading:
+      operatorsResult.isLoading ||
+      requestsResult.isLoading ||
+      curRoundResult.isLoading ||
+      disputeTimestampsResult.isLoading,
+    error:
+      operatorsResult.error ||
+      requestsResult.error ||
+      curRoundResult.error ||
+      disputeTimestampsResult.error,
     refetch,
   };
 }

@@ -12,6 +12,14 @@ export interface ActivatedNode {
   address: string;
 }
 
+export interface DisputeInfo {
+  hasDispute: boolean;
+  curRound: string | null;
+  requestedToSubmitCvTimestamp?: string;
+  requestedToSubmitCoTimestamp?: string;
+  previousSSubmitTimestamp?: string;
+}
+
 export interface HomeData {
   activatedOperators: `0x${string}`[] | undefined;
   leaderAddress: `0x${string}` | undefined;
@@ -19,4 +27,5 @@ export interface HomeData {
   activatedNodeList: ActivatedNode[];
   requestDisabled: boolean;
   isHalted: boolean;
+  disputeInfo: DisputeInfo;
 }

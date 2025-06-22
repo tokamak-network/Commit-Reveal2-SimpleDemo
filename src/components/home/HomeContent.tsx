@@ -68,6 +68,7 @@ export default function HomeContent() {
           consumerExampleAddress={contracts.consumerExample as `0x${string}`}
           chainId={chainId}
           onRefundSuccess={manualRefresh}
+          disputeInfo={homeData.disputeInfo}
         />
 
         <ActivatedNodeList

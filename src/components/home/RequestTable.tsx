@@ -1,6 +1,7 @@
 "use client";
 
 import { consumerExampleAbi, getExplorerUrl } from "@/constants";
+import { DisputeInfo } from "@/types/home";
 import { estimateFeesPerGas, estimateGas } from "@wagmi/core";
 import axios from "axios";
 import Link from "next/link";
@@ -27,6 +28,7 @@ interface Props {
   consumerExampleAddress: `0x${string}`;
   chainId: number;
   onRefundSuccess?: () => void;
+  disputeInfo: DisputeInfo;
 }
 
 export default function RequestTable({
@@ -38,6 +40,7 @@ export default function RequestTable({
   consumerExampleAddress,
   chainId,
   onRefundSuccess,
+  disputeInfo,
 }: Props) {
   const { address } = useAccount();
   const config = useConfig();
@@ -268,7 +271,22 @@ export default function RequestTable({
                     }`}
                   >
                     <td className="px-4 py-2 text-sm font-medium text-gray-700">
-                      {req.id}
+                      <div className="flex items-center gap-2">
+                        <span>{req.id}</span>
+                        {/* Dispute indicator for current round */}
+                        {disputeInfo.hasDispute &&
+                          disputeInfo.curRound === req.id && (
+                            <div className="relative group">
+                              <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 border border-orange-300">
+                                ⚠️
+                              </span>
+                              <div className="fixed mt-[-60px] ml-[-10px] py-1 px-2 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[9999] whitespace-nowrap shadow-lg">
+                                Current round has dispute
+                                <div className="absolute top-full left-5 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
+                          )}
+                      </div>
                     </td>
                     <td className="px-2 py-2 text-sm hidden sm:table-cell">
                       <span
