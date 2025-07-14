@@ -11,7 +11,8 @@ export function useParticipants(
   requestId: string,
   currentRound: bigint | undefined,
   input?: ReturnType<typeof useDecodedInput>,
-  startTime?: bigint
+  round?: bigint,
+  trialNum?: bigint
 ) {
   const config = useConfig();
   const chainId = useChainId();
@@ -41,7 +42,7 @@ export function useParticipants(
             setParticipants(res as `0x${string}`[]);
           }
         } else {
-          if (!input || !startTime) {
+          if (!input || round === undefined || trialNum === undefined) {
             isLoading = false;
             return;
           }
@@ -66,7 +67,8 @@ export function useParticipants(
 
           const types = {
             Message: [
-              { name: "timestamp", type: "uint256" },
+              { name: "round", type: "uint256" },
+              { name: "trialNum", type: "uint256" },
               { name: "cv", type: "bytes32" },
             ],
           };
@@ -78,7 +80,8 @@ export function useParticipants(
                 types,
                 primaryType: "Message",
                 message: {
-                  timestamp: startTime,
+                  round,
+                  trialNum,
                   cv,
                 },
                 signature: {
@@ -105,7 +108,16 @@ export function useParticipants(
     return () => {
       isMounted = false;
     };
-  }, [currentRound, requestId, input, startTime, config, chainId, contracts]);
+  }, [
+    currentRound,
+    requestId,
+    input,
+    round,
+    trialNum,
+    config,
+    chainId,
+    contracts,
+  ]);
 
   return participants;
 }

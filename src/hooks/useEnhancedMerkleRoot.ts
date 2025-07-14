@@ -10,8 +10,10 @@ import { useEffect, useState } from "react";
 import { useChainId, useConfig } from "wagmi";
 
 export function useEnhancedMerkleRoot(
-  startTime: bigint | undefined,
-  curStartTime: bigint | undefined,
+  round: bigint | undefined,
+  trialNum: bigint | undefined,
+  curRound: bigint | undefined,
+  curTrialNum: bigint | undefined,
   revealRows: Array<{ nodeIndex: number; secret: `0x${string}` | undefined }>,
   refreshTrigger?: number
 ) {
@@ -21,7 +23,7 @@ export function useEnhancedMerkleRoot(
   const [merkleRoot, setMerkleRoot] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!startTime || startTime === BigInt(0)) return;
+    if (round === undefined || trialNum === undefined) return;
 
     let isMounted = true;
     let isLoading = false;
@@ -31,14 +33,19 @@ export function useEnhancedMerkleRoot(
 
       isLoading = true;
       try {
-        // Compare startTime with curStartTime
-        if (curStartTime !== undefined && startTime === curStartTime) {
-          // Times match: use the existing contract-based approach
+        // Compare round/trialNum with curRound/curTrialNum
+        if (
+          curRound !== undefined &&
+          curTrialNum !== undefined &&
+          round === curRound &&
+          trialNum === curTrialNum
+        ) {
+          // Values match: use the existing contract-based approach
           const res = await readContract(config, {
             abi: commitReveal2Abi,
             address: contracts.commitReveal2 as `0x${string}`,
             functionName: "getMerkleRoot",
-            args: [startTime],
+            args: [round, trialNum],
             blockTag: "latest",
           });
 
@@ -91,7 +98,16 @@ export function useEnhancedMerkleRoot(
     return () => {
       isMounted = false;
     };
-  }, [startTime, curStartTime, revealRows, config, contracts, refreshTrigger]);
+  }, [
+    round,
+    trialNum,
+    curRound,
+    curTrialNum,
+    revealRows,
+    config,
+    contracts,
+    refreshTrigger,
+  ]);
 
   return merkleRoot;
 }

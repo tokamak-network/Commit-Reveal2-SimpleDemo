@@ -58,7 +58,7 @@ export function useHomeData() {
   // 현재 라운드 및 시작 시간 가져오기
   const curRoundResult = useReadContract({
     ...commitReveal2Contract,
-    functionName: "getCurRoundAndStartTime",
+    functionName: "getCurRoundAndTrialNum",
     query: {
       enabled: true,
       refetchInterval: 0,
@@ -82,12 +82,12 @@ export function useHomeData() {
   // 현재 라운드 정보 파싱
   const curRoundData = useMemo(() => {
     if (curRoundResult.status !== "success" || !curRoundResult.data) {
-      return { curRound: null, curTimestamp: null };
+      return { curRound: null, curTrialNum: null };
     }
-    const [curRound, curTimestamp] = curRoundResult.data as [bigint, bigint];
+    const [curRound, curTrialNum] = curRoundResult.data as [bigint, bigint];
     return {
       curRound: curRound.toString(),
-      curTimestamp: curTimestamp.toString(),
+      curTrialNum: curTrialNum.toString(),
     };
   }, [curRoundResult.status, curRoundResult.data]);
 
@@ -95,11 +95,13 @@ export function useHomeData() {
   const disputeTimestampsResult = useReadContract({
     ...commitReveal2Contract,
     functionName: "getDisputeTimestamps",
-    args: curRoundData.curTimestamp
-      ? [BigInt(curRoundData.curTimestamp)]
-      : undefined,
+    args: [
+      BigInt(curRoundData.curRound ?? "0"),
+      BigInt(curRoundData.curTrialNum ?? "0"),
+    ],
     query: {
-      enabled: !!curRoundData.curTimestamp,
+      enabled:
+        curRoundData.curRound !== null && curRoundData.curTrialNum !== null,
       refetchInterval: 0,
       staleTime: 30000,
       retry: 0,
@@ -108,11 +110,7 @@ export function useHomeData() {
 
   // 분쟁 정보 파싱
   const disputeInfo = useMemo(() => {
-    if (
-      disputeTimestampsResult.status !== "success" ||
-      !disputeTimestampsResult.data ||
-      !curRoundData.curRound
-    ) {
+    if (disputeTimestampsResult.status !== "success") {
       return { hasDispute: false, curRound: curRoundData.curRound };
     }
 

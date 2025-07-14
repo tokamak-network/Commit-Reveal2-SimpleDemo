@@ -115,7 +115,8 @@ export interface DisputeInfo {
 
 // Create a separate hook for dispute info calculation
 export function useDisputeInfo(
-  startTime: bigint | undefined,
+  round: bigint | undefined,
+  trialNum: bigint | undefined,
   participants: `0x${string}`[]
 ) {
   const chainId = useChainId();
@@ -127,26 +128,27 @@ export function useDisputeInfo(
 
   const [disputeInfo, setDisputeInfo] = useState<DisputeInfo | null>(null);
 
-  // Add getDisputeInfos call when we have startTime
+  // Add getDisputeInfos call when we have round and trialNum
   const disputeResult = useReadContracts({
-    contracts: startTime
-      ? [
-          {
-            address: commitReveal2Address,
-            abi: commitReveal2Abi,
-            functionName: "getDisputeInfos",
-            args: [startTime],
-          },
-          {
-            address: commitReveal2Address,
-            abi: commitReveal2Abi,
-            functionName: "getSecrets",
-            args: [participants.length],
-          },
-        ]
-      : [],
+    contracts:
+      round !== undefined && trialNum !== undefined
+        ? [
+            {
+              address: commitReveal2Address,
+              abi: commitReveal2Abi,
+              functionName: "getDisputeInfos",
+              args: [round, trialNum],
+            },
+            {
+              address: commitReveal2Address,
+              abi: commitReveal2Abi,
+              functionName: "getSecrets",
+              args: [participants.length],
+            },
+          ]
+        : [],
     query: {
-      enabled: !!startTime,
+      enabled: round !== undefined && trialNum !== undefined,
       refetchInterval: 0,
       staleTime: 30000,
       retry: 0,
@@ -219,12 +221,6 @@ export function useDisputeInfo(
           Array.isArray(disputeResult.data[1].result)
         ) {
           const secrets = disputeResult.data[1].result;
-          console.log(
-            "Secrets from contract:",
-            secrets,
-            "Type of first secret:",
-            typeof secrets[0]
-          );
 
           // Sort secrets according to reveal order
           secretsInRevealOrder = revealOrders.map((nodeIndex) => {
@@ -346,7 +342,13 @@ export function useRequestDetail(requestId: string) {
       {
         address: commitReveal2Address,
         abi: commitReveal2Abi,
-        functionName: "getCurStartTime",
+        functionName: "getCurRoundAndTrialNum",
+      },
+      {
+        address: commitReveal2Address,
+        abi: commitReveal2Abi,
+        functionName: "s_trialNum",
+        args: [requestId],
       },
     ],
     query: {
@@ -366,6 +368,22 @@ export function useRequestDetail(requestId: string) {
     () => result.data?.[1]?.result as bigint | undefined,
     [result.data]
   );
+
+  // Get round and trialNum for this specific request
+  const requestRound = useMemo(() => BigInt(requestId), [requestId]);
+  const requestTrialNum = useMemo(
+    () => result.data?.[5]?.result as bigint | undefined,
+    [result.data]
+  );
+
+  // Get current round and trialNum for comparison
+  const [curRound, curTrialNum] = useMemo(() => {
+    if (result.data?.[4]?.result) {
+      const [round, trialNum] = result.data[4].result as [bigint, bigint];
+      return [round, trialNum];
+    }
+    return [undefined, undefined];
+  }, [result.data]);
 
   const detailInfo = useMemo((): DetailInfo | null => {
     if (!result.data?.[0]?.result) return null;
@@ -402,11 +420,6 @@ export function useRequestDetail(requestId: string) {
     [result.data]
   );
 
-  const curStartTime = useMemo(
-    () => result.data?.[4]?.result as bigint | undefined,
-    [result.data]
-  );
-
   const isHalted = useMemo(() => {
     return processStatus === BigInt(3); // HALTED = 3
   }, [processStatus]);
@@ -415,7 +428,10 @@ export function useRequestDetail(requestId: string) {
     detailInfo,
     currentRound,
     startTime,
-    curStartTime,
+    requestRound,
+    requestTrialNum,
+    curRound,
+    curTrialNum,
     isHalted,
     isLoading: result.isLoading,
     error: result.error,

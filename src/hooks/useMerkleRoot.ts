@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { useChainId, useConfig } from "wagmi";
 
 export function useMerkleRoot(
-  startTime: bigint | undefined,
+  round: bigint | undefined,
+  trialNum: bigint | undefined,
   refreshTrigger?: number // 리프레시 트리거로 사용될 값
 ) {
   const config = useConfig();
@@ -15,7 +16,7 @@ export function useMerkleRoot(
   const [merkleRoot, setMerkleRoot] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!startTime || startTime === BigInt(0)) return;
+    if (round === undefined || trialNum === undefined) return;
 
     let isMounted = true;
     let isLoading = false;
@@ -29,7 +30,7 @@ export function useMerkleRoot(
           abi: commitReveal2Abi,
           address: contracts.commitReveal2 as `0x${string}`,
           functionName: "getMerkleRoot",
-          args: [startTime],
+          args: [round, trialNum],
           blockTag: "latest",
         });
 
@@ -49,7 +50,7 @@ export function useMerkleRoot(
     return () => {
       isMounted = false;
     };
-  }, [startTime, config, contracts, refreshTrigger]);
+  }, [round, trialNum, config, contracts, refreshTrigger]);
 
   return merkleRoot;
 }
