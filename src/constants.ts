@@ -502,6 +502,16 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "getCurRoundAndTrialNum",
+    inputs: [],
+    outputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "uint256", internalType: "uint256" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getCurStartTime",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -517,7 +527,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "getDisputeInfos",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [
       {
         name: "requestedToSubmitCvTimestamp",
@@ -575,7 +588,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "getDisputeTimestamps",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [
       {
         name: "requestedToSubmitCvTimestamp",
@@ -598,10 +614,46 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "getMerkleRoot",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [
       { name: "", type: "bytes32", internalType: "bytes32" },
       { name: "", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getPeriods",
+    inputs: [],
+    outputs: [
+      {
+        name: "offChainSubmissionPeriod",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "requestOrSubmitOrFailDecisionPeriod",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "onChainSubmissionPeriod",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "offChainSubmissionPeriodPerOperator",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "onChainSubmissionPeriodPerOperator",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "view",
   },
@@ -828,13 +880,6 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
-    name: "s_l1FeeCoefficient",
-    inputs: [],
-    outputs: [{ name: "", type: "uint8", internalType: "uint8" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "s_merkleRoot",
     inputs: [],
     outputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
@@ -843,7 +888,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "s_merkleRootSubmittedTimestamp",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -857,7 +905,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "s_previousSSubmitTimestamp",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -901,7 +952,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "s_requestedToSubmitCoTimestamp",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -915,7 +969,10 @@ export const commitReveal2Abi = [
   {
     type: "function",
     name: "s_requestedToSubmitCvTimestamp",
-    inputs: [{ name: "startTime", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "round", type: "uint256", internalType: "uint256" },
+      { name: "trialNum", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -956,6 +1013,13 @@ export const commitReveal2Abi = [
   },
   {
     type: "function",
+    name: "s_trialNum",
+    inputs: [{ name: "round", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "trialNum", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "s_zeroBitIfSubmittedCoBitmap",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -972,13 +1036,6 @@ export const commitReveal2Abi = [
       },
       { name: "flatFee", type: "uint256", internalType: "uint256" },
     ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "setL1FeeCoefficient",
-    inputs: [{ name: "coefficient", type: "uint8", internalType: "uint8" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -1075,7 +1132,13 @@ export const commitReveal2Abi = [
     name: "CoSubmitted",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1100,7 +1163,13 @@ export const commitReveal2Abi = [
     name: "CvSubmitted",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1141,23 +1210,16 @@ export const commitReveal2Abi = [
   },
   {
     type: "event",
-    name: "L1FeeCalculationSet",
-    inputs: [
-      {
-        name: "coefficient",
-        type: "uint8",
-        indexed: false,
-        internalType: "uint8",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
     name: "MerkleRootSubmitted",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1218,7 +1280,7 @@ export const commitReveal2Abi = [
   },
   {
     type: "event",
-    name: "RandomNumberGenerated",
+    name: "RequestedToSubmitCo",
     inputs: [
       {
         name: "round",
@@ -1227,26 +1289,7 @@ export const commitReveal2Abi = [
         internalType: "uint256",
       },
       {
-        name: "randomNumber",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "callbackSuccess",
-        type: "bool",
-        indexed: false,
-        internalType: "bool",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "RequestedToSubmitCo",
-    inputs: [
-      {
-        name: "startTime",
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1271,13 +1314,19 @@ export const commitReveal2Abi = [
     name: "RequestedToSubmitCv",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
       },
       {
-        name: "packedIndices",
+        name: "trialNum",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "packedIndicesAscendingFromLSB",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1290,7 +1339,13 @@ export const commitReveal2Abi = [
     name: "RequestedToSubmitSFromIndexK",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1309,7 +1364,13 @@ export const commitReveal2Abi = [
     name: "SSubmitted",
     inputs: [
       {
-        name: "startTime",
+        name: "round",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "trialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1334,7 +1395,13 @@ export const commitReveal2Abi = [
     name: "Status",
     inputs: [
       {
-        name: "curStartTime",
+        name: "curRound",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "curTrialNum",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -1363,6 +1430,7 @@ export const commitReveal2Abi = [
   { type: "error", name: "AlreadyRequestedToSubmitS", inputs: [] },
   { type: "error", name: "AlreadySubmittedMerkleRoot", inputs: [] },
   { type: "error", name: "AlreadySubmittedS", inputs: [] },
+  { type: "error", name: "CannotRequestWhenHalted", inputs: [] },
   { type: "error", name: "CoNotRequested", inputs: [] },
   { type: "error", name: "CvNotEqualDoubleHashS", inputs: [] },
   { type: "error", name: "CvNotEqualHashCo", inputs: [] },
@@ -1375,12 +1443,6 @@ export const commitReveal2Abi = [
   { type: "error", name: "InProcess", inputs: [] },
   { type: "error", name: "InsufficientAmount", inputs: [] },
   { type: "error", name: "InvalidIndex", inputs: [] },
-  {
-    type: "error",
-    name: "InvalidL1FeeCoefficient",
-    inputs: [{ name: "coefficient", type: "uint8", internalType: "uint8" }],
-  },
-  { type: "error", name: "InvalidRound", inputs: [] },
   { type: "error", name: "InvalidSecretLength", inputs: [] },
   { type: "error", name: "InvalidShortString", inputs: [] },
   { type: "error", name: "InvalidSignature", inputs: [] },
@@ -1393,9 +1455,15 @@ export const commitReveal2Abi = [
   { type: "error", name: "MerkleRootIsSubmitted", inputs: [] },
   { type: "error", name: "MerkleRootNotSubmitted", inputs: [] },
   { type: "error", name: "MerkleVerificationFailed", inputs: [] },
+  {
+    type: "error",
+    name: "NewOwnerCannotBeActivatedOperator",
+    inputs: [],
+  },
   { type: "error", name: "NewOwnerIsZeroAddress", inputs: [] },
   { type: "error", name: "NoCvsOnChain", inputs: [] },
   { type: "error", name: "NoHandoverRequest", inputs: [] },
+  { type: "error", name: "NonExistentRound", inputs: [] },
   { type: "error", name: "NotActivatedOperator", inputs: [] },
   { type: "error", name: "NotConsumer", inputs: [] },
   { type: "error", name: "NotEnoughActivatedOperators", inputs: [] },
@@ -1406,6 +1474,7 @@ export const commitReveal2Abi = [
   { type: "error", name: "RandomNumGenerated", inputs: [] },
   { type: "error", name: "RevealNotInDescendingOrder", inputs: [] },
   { type: "error", name: "RevealOrderHasDuplicates", inputs: [] },
+  { type: "error", name: "RoundAlreadyProcessed", inputs: [] },
   { type: "error", name: "SNotRequested", inputs: [] },
   { type: "error", name: "SRequested", inputs: [] },
   { type: "error", name: "SignatureAndIndexDoNotMatch", inputs: [] },
@@ -1414,6 +1483,7 @@ export const commitReveal2Abi = [
     name: "StringTooLong",
     inputs: [{ name: "str", type: "string", internalType: "string" }],
   },
+  { type: "error", name: "SubmitAfterStartTime", inputs: [] },
   { type: "error", name: "TooEarly", inputs: [] },
   { type: "error", name: "TooLate", inputs: [] },
   { type: "error", name: "TooManyRequestsQueued", inputs: [] },
