@@ -32,7 +32,10 @@ export default function RequestDetailClient({
     detailInfo,
     currentRound,
     startTime,
-    curStartTime,
+    requestRound,
+    requestTrialNum,
+    curRound,
+    curTrialNum,
     isHalted,
     isLoading: detailLoading,
     refetch: detailRefetch,
@@ -57,7 +60,8 @@ export default function RequestDetailClient({
     requestId,
     currentRound,
     decodedInput,
-    startTime
+    requestRound,
+    requestTrialNum
   );
 
   // Get dispute info using separate hook
@@ -65,14 +69,16 @@ export default function RequestDetailClient({
     disputeInfo,
     isLoading: disputeLoading,
     refetch: disputeRefetch,
-  } = useDisputeInfo(startTime, participants);
+  } = useDisputeInfo(requestRound, requestTrialNum, participants);
 
   // Check if this is a historical dispute case where data is not available
   const isHistoricalDispute =
     disputeInfo?.secretRequested &&
-    startTime !== undefined &&
-    curStartTime !== undefined &&
-    startTime !== curStartTime;
+    requestRound !== undefined &&
+    requestTrialNum !== undefined &&
+    curRound !== undefined &&
+    curTrialNum !== undefined &&
+    (requestRound !== curRound || requestTrialNum !== curTrialNum);
 
   const isLoading = detailLoading || disputeLoading;
 
@@ -91,8 +97,10 @@ export default function RequestDetailClient({
   // 기타 데이터
   const revealRows = useDecodedRevealOrder(decodedInput);
   const merkleRoot = useEnhancedMerkleRoot(
-    startTime,
-    curStartTime,
+    requestRound,
+    requestTrialNum,
+    curRound,
+    curTrialNum,
     revealRows,
     refreshCounter
   );
@@ -135,6 +143,32 @@ export default function RequestDetailClient({
           <h2 className="font-semibold text-lg text-gray-800 mb-2">
             Request ID: <span className="font-mono break-all">{requestId}</span>
           </h2>
+
+          {/* Trial Information */}
+          {requestTrialNum !== undefined && (
+            <div className="mb-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">
+                Trial Information
+              </h3>
+              <div className="text-sm text-gray-800 space-y-1">
+                <p>
+                  <span className="font-medium">Current Trial:</span> #
+                  {requestTrialNum.toString()}
+                </p>
+                {requestTrialNum > BigInt(0) && (
+                  <p>
+                    <span className="font-medium">Failed Trials:</span>{" "}
+                    {Array.from(
+                      { length: Number(requestTrialNum) },
+                      (_, i) => `#${i}`
+                    ).join(", ")}{" "}
+                    ({requestTrialNum.toString()} trial
+                    {requestTrialNum > BigInt(1) ? "s" : ""} failed)
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Refund button - show when halted, not generated, and user is requester */}
           {!shouldShowEmptyState &&

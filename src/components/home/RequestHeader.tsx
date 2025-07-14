@@ -231,7 +231,7 @@ export default function RequestHeader({
         Request a Random Number
       </h1>
       <p className="text-lg text-gray-600 mb-4">
-        Your Requests Count:{" "}
+        Total Requests Count:{" "}
         <span className="font-semibold text-black">{requestsCount}</span>
       </p>
       <button
