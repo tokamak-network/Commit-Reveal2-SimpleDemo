@@ -222,6 +222,7 @@ export default function RequestHeader({
       functionName: "estimateRequestPrice",
       args: [callbackGasLimit, gasPrice],
     });
+    console.log("requestFee", requestFee);
     return { requestFee: requestFee as bigint, gasPrice };
   }
 

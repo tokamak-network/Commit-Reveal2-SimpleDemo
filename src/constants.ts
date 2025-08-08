@@ -14,12 +14,17 @@ export const chainsToContracts: ContractsConfig = {
     consumerExample: "0x86651a7186AE87CdEFdB489c01e2b5f941a26EC9",
     commitReveal2: "0x31fF8fd03aD22EF400E6E9fF318Fa579539AB1a8",
   },
+  11155420: {
+    consumerExample: "0xAcde3D27c9B0Ec8fD3266F354fD5A8A40196aec4",
+    commitReveal2: "0x59C282FDE2d304242feBbf2617cf0365Ced03eb1",
+  },
 };
 
 export const chainIdToExplorerUrl: { [chainId: number]: string | null } = {
   11155111: "https://sepolia.etherscan.io",
   111551119090: "https://explorer.thanos-sepolia.tokamak.network",
   31337: null,
+  11155420: "https://testnet-explorer.optimism.io",
 };
 
 export function getExplorerUrl(chainId: number, path?: string): string {
@@ -348,8 +353,22 @@ export const commitReveal2Abi = [
     inputs: [
       {
         name: "callbackGasLimit",
-        type: "uint256",
-        internalType: "uint256",
+        type: "uint32",
+        internalType: "uint32",
+      },
+      { name: "gasPrice", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "estimateRequestPriceWithNumOfOperators",
+    inputs: [
+      {
+        name: "callbackGasLimit",
+        type: "uint32",
+        internalType: "uint32",
       },
       { name: "gasPrice", type: "uint256", internalType: "uint256" },
       {
@@ -357,20 +376,6 @@ export const commitReveal2Abi = [
         type: "uint256",
         internalType: "uint256",
       },
-    ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "estimateRequestPrice",
-    inputs: [
-      {
-        name: "callbackGasLimit",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      { name: "gasPrice", type: "uint256", internalType: "uint256" },
     ],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
@@ -925,13 +930,13 @@ export const commitReveal2Abi = [
     inputs: [{ name: "round", type: "uint256", internalType: "uint256" }],
     outputs: [
       { name: "consumer", type: "address", internalType: "address" },
-      { name: "startTime", type: "uint256", internalType: "uint256" },
-      { name: "cost", type: "uint256", internalType: "uint256" },
       {
         name: "callbackGasLimit",
-        type: "uint256",
-        internalType: "uint256",
+        type: "uint32",
+        internalType: "uint32",
       },
+      { name: "startTime", type: "uint256", internalType: "uint256" },
+      { name: "cost", type: "uint256", internalType: "uint256" },
     ],
     stateMutability: "view",
   },
@@ -1471,10 +1476,15 @@ export const commitReveal2Abi = [
   { type: "error", name: "OnChainCvNotEqualDoubleHashS", inputs: [] },
   { type: "error", name: "OnlyActivatedOperatorCanClaim", inputs: [] },
   { type: "error", name: "OwnerCannotActivate", inputs: [] },
-  { type: "error", name: "RandomNumGenerated", inputs: [] },
+  {
+    type: "error",
+    name: "PendingOwnerCannotBeActivatedOperator",
+    inputs: [],
+  },
   { type: "error", name: "RevealNotInDescendingOrder", inputs: [] },
   { type: "error", name: "RevealOrderHasDuplicates", inputs: [] },
   { type: "error", name: "RoundAlreadyProcessed", inputs: [] },
+  { type: "error", name: "RoundNotInProgress", inputs: [] },
   { type: "error", name: "SNotRequested", inputs: [] },
   { type: "error", name: "SRequested", inputs: [] },
   { type: "error", name: "SignatureAndIndexDoNotMatch", inputs: [] },
@@ -1489,6 +1499,7 @@ export const commitReveal2Abi = [
   { type: "error", name: "TooManyRequestsQueued", inputs: [] },
   { type: "error", name: "TransferFailed", inputs: [] },
   { type: "error", name: "Unauthorized", inputs: [] },
+  { type: "error", name: "WithdrawAmountIsZero", inputs: [] },
   { type: "error", name: "WrongRevealOrder", inputs: [] },
   { type: "error", name: "ZeroLength", inputs: [] },
 ];
