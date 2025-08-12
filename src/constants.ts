@@ -15,8 +15,8 @@ export const chainsToContracts: ContractsConfig = {
     commitReveal2: "0x31fF8fd03aD22EF400E6E9fF318Fa579539AB1a8",
   },
   11155420: {
-    consumerExample: "0x733643594c5bb75fe22c16f7169f767fa6e8112f",
-    commitReveal2: "0x33d4bd0930109ba0605c3bc0766ffce361949b06",
+    consumerExample: "0x44C064253181B5ff450e66C404E587924d26B57e",
+    commitReveal2: "0x07551AF0CcBDcEBFb16cBe9E7b9cEa3F5A2fA708",
   },
 };
 
@@ -24,7 +24,7 @@ export const chainIdToExplorerUrl: { [chainId: number]: string | null } = {
   11155111: "https://sepolia.etherscan.io",
   111551119090: "https://explorer.thanos-sepolia.tokamak.network",
   31337: null,
-  11155420: "https://testnet-explorer.optimism.io",
+  11155420: "https://sepolia-optimism.etherscan.io",
 };
 
 export function getExplorerUrl(chainId: number, path?: string): string {
